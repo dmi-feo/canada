@@ -1,0 +1,8 @@
+YT_ATTR_DL_TYPE = "dl_type"
+YT_ATTR_DL_TITLE = "dl_title"
+YT_ATTR_DL_DESCRIPTION = "dl_description"
+
+YT_ATTR_ALL = [YT_ATTR_DL_TYPE, YT_ATTR_DL_TITLE, YT_ATTR_DL_DESCRIPTION]
+
+DL_COLLECTION_TYPE = "collection"
+DL_WORKBOOK_TYPE = "workbook"

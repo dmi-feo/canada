@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "canada"
+authors = [
+    {name = "John Doe", email = "johndoe@example.com"},
+]
+description = "Make US redundant again"
+requires-python = ">=3.7"
+license = {text = "BSD-3-Clause"}
+dependencies = [
+    "aiohttp",
+    'fastapi',
+]
+dynamic = ["version"]
