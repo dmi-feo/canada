@@ -18,16 +18,20 @@ class Permissions:
 
 
 @dataclass
-class BaseUSContainer:
-    title: str
-    description: str
-    projectId: str | None
+class BaseUSEntity:
     tenantId: str | None
     meta: dict
     createdBy: str
     createdAt: str
     updatedBy: str
     updatedAt: str
+
+
+@dataclass
+class BaseUSContainer(BaseUSEntity):
+    title: str
+    description: str
+    projectId: str | None
 
 
 @dataclass
@@ -54,3 +58,17 @@ class Workbook(BaseUSContainer):
 class CollectionContent:
     collections: list[Collection]
     workbooks: list[Workbook]
+
+
+@dataclass
+class Entry(BaseUSEntity):
+    data: dict
+    entryId: ID
+    workbookId: ID
+    key: str  # TODO: really required?
+    permissions: dict  # TODO: really required? then make a dataclass
+    publishedId: ID
+    revId: ID
+    savedId: ID
+    scope: str
+    type: str

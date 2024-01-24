@@ -1,6 +1,6 @@
 import marshmallow as ma
 
-from canada.base_schema import IDField, WorkbookSchema
+from canada.base_schema import IDField, WorkbookSchema, EntrySchema
 
 
 class CreateWorkbookRequest(ma.Schema):
@@ -15,3 +15,7 @@ class CreateWorkbookResponse(WorkbookSchema):
 
 class GetWorkbookResponse(WorkbookSchema):
     pass
+
+
+class GetWorkbookEntriesResponse(ma.Schema):
+    entries = ma.fields.Nested(EntrySchema, many=True)

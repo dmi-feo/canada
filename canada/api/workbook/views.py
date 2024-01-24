@@ -33,7 +33,8 @@ async def get_workbook(request, app_services: AppServices):
 
 
 @router.get("/v2/workbooks/{workbook_id}/entries")
-async def get_workbook_entries(workbook_id: str):
-    async with get_yt_cli() as yt:
-        info = await yt.list_dir(f"{YT_HOME_PREFIX}/{workbook_id}")
-    pass
+@response_schema(schema.GetWorkbookEntriesResponse)
+async def get_workbook_entries(request, app_services: AppServices):
+    workbook_id = ID.from_str(request.match_info["workbook_id"])
+    data = await app_services.wbman.get_workbook_entries(workbook_id)
+    return {"entries": data}

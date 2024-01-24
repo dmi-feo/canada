@@ -1,5 +1,12 @@
+from typing import Type
+
+import marshmallow as ma
+
 from canada.yt_client import SimpleYtClient
-from canada.models import CollectionContent, Workbook, Collection, Permissions,CollectionPermissions
+from canada.models import (
+    CollectionContent, Workbook, Collection,
+    Permissions, CollectionPermissions, Entry, BaseUSEntity
+)
 from canada import constants as const
 from canada.id import ID
 from canada.tools import simplify_string
@@ -125,6 +132,32 @@ def deserialize_collection(raw_data: dict, collection_id: ID) -> Collection:
     )
 
 
+class BaseStorageSchema[T](ma.Schema):
+    TARGET_TYPE = Type[BaseUSEntity]
+
+    def load_object(self, *args, **kwargs) -> T:
+        return self.TARGET_TYPE(**self.loads(*args, **kwargs))
+
+
+class EntryStorageSchema[Entry](BaseStorageSchema):
+    TARGET_TYPE = Entry
+
+    created_at = ma.fields.String(data_key="createdAt")
+    updated_at = ma.fields.String(data_key="updatedAt")
+    created_by = ma.fields.String(data_key="createdBy")
+    data = ma.fields.Dict()
+    entry_id = ma.fields.String(data_key="entryId")
+    key = ma.fields.String()
+    meta = ma.fields.Dict()
+    permissions = ma.fields.Dict()
+    published_id = ma.fields.String(data_key="publishedId")
+    rev_id = ma.fields.String(data_key="revId")
+    saved_id = ma.fields.String(data_key="savedId")
+    scope = ma.fields.String()
+    type_ = ma.fields.String(data_key="type")
+    workbook_id = ma.fields.String(data_key="workbookId")
+
+
 class WBManager:
     def __init__(self, yt_cli: SimpleYtClient):
         self.yt = yt_cli
@@ -185,3 +218,9 @@ class WBManager:
                 await self.yt.set_attribute(node_id.to_path(), const.YT_ATTR_DL_DESCRIPTION, description)
 
         return node_id
+
+    async def get_workbook_entries(self, wb_id: ID) -> list[Entry]:
+        async with self.yt:
+            dir_objects = await self.yt.list_dir(wb_id.to_path(), attributes=const.YT_ATTR_ALL)
+
+        return [EntryStorageSchema().load_object(item) for item in dir_objects]
