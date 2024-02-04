@@ -32,3 +32,7 @@ class ID:
 
     def add(self, key: str):
         return ID(parts=self._parts + [key])
+
+    @classmethod
+    def empty(cls):
+        return cls(parts=[])

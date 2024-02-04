@@ -5,8 +5,8 @@ from canada.contrib.ma_top_level import TopLevelSchema
 
 
 class RootCollectionPermissionsResponse(ma.Schema):
-    createCollectionInRoot = ma.fields.Bool()
-    createWorkbookInRoot = ma.fields.Bool()
+    create_collection_in_root = ma.fields.Bool(data_key="createCollectionInRoot")
+    create_workbook_in_root = ma.fields.Bool(data_key="createWorkbookInRoot")
 
 
 class CollectionResponseSchema(base_schema.CollectionSchema):
@@ -14,7 +14,7 @@ class CollectionResponseSchema(base_schema.CollectionSchema):
 
 
 class InternalObject(ma.Schema):
-    collectionId = base_schema.IDField()
+    collection_id = base_schema.IDField(data_key="collectionId")
     title = ma.fields.String()
 
 
@@ -24,14 +24,14 @@ class CollectionBreadcrumbsResponse(TopLevelSchema):
 
 class CollectionContentResponseSchema(ma.Schema):
     collections = ma.fields.Nested(bsch.CollectionSchema, many=True)
-    collectionsNextPageToken = ma.fields.Bool()
+    collections_next_page_token = ma.fields.Bool(data_key="collectionsNextPageToken")
     workbooks = ma.fields.Nested(bsch.WorkbookSchema, many=True)
-    workbooksNextPageToken = ma.fields.Bool()
+    workbooks_next_page_token = ma.fields.Bool(data_key="workbooksNextPageToken")
 
 
 class CreateCollectionRequest(ma.Schema):
     title = ma.fields.String()
-    parentId = base_schema.IDField(allow_none=True)
+    parent_id = base_schema.IDField(allow_none=True, data_key="parentId")
     description = ma.fields.String()
 
 

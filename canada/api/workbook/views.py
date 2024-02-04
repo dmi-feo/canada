@@ -1,7 +1,5 @@
 from aiohttp import web
 
-from canada.yt_client import get_yt_cli
-from canada.settings import YT_HOME_PREFIX
 from canada.app_stuff import AppServices
 from canada.aiohttp_marshmallow.base import request_schema, response_schema
 from canada.api.workbook import schema
@@ -17,7 +15,7 @@ router = web.RouteTableDef()
 async def create_workbook(request, verified_json: dict, app_services: AppServices):
     workbook_id = await app_services.wbman.create_workbook(
         title=verified_json["title"],
-        collection_id=ID.from_str(verified_json["collectionId"]),
+        collection_id=ID.from_str(verified_json["collection_id"]),
         description=verified_json["description"],
     )
     data = await app_services.wbman.get_workbook(workbook_id)

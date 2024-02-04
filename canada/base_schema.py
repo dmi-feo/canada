@@ -7,24 +7,24 @@ class IDField(ma.fields.String):
 
 class BaseUSEntitySchema(ma.Schema):
     meta = ma.fields.Dict()
-    createdBy = ma.fields.String()  # TODO: consider datetime
-    createdAt = ma.fields.String()
-    updatedBy = ma.fields.String()
-    updatedAt = ma.fields.String()
-    tenantId = ma.fields.String()
+    created_by = ma.fields.String(data_key="createdBy")  # TODO: consider datetime
+    created_at = ma.fields.String(data_key="createdAt")
+    updated_by = ma.fields.String(data_key="updatedBy")
+    updated_at = ma.fields.String(data_key="updatedAt")
+    tenant_id = ma.fields.String(data_key="tenantId")
 
 
 class BaseUSContainerSchema(BaseUSEntitySchema):
     title = ma.fields.String()
     description = ma.fields.String()
-    parentId = IDField()
-    projectId = ma.fields.String()
+    parent_id = IDField(data_key="parentId")
+    project_id = ma.fields.String(data_key="projectId")
 
 
 class BasePermissionsSchema(ma.Schema):
-    listAccessBindings = ma.fields.Bool()
-    updateAccessBindings = ma.fields.Bool()
-    limitedView = ma.fields.Bool()
+    list_access_bindings = ma.fields.Bool(data_key="listAccessBindings")
+    update_access_bindings = ma.fields.Bool(data_key="updateAccessBindings")
+    limited_view = ma.fields.Bool(data_key="limitedView")
     view = ma.fields.Bool()
     update = ma.fields.Bool()
     copy = ma.fields.Bool()
@@ -35,30 +35,38 @@ class BasePermissionsSchema(ma.Schema):
 
 
 class CollectionPermissionsSchema(BasePermissionsSchema):
-    createCollection = ma.fields.Bool()
-    createWorkbook = ma.fields.Bool()
+    create_collection = ma.fields.Bool(data_key="createCollection")
+    create_workbook = ma.fields.Bool(data_key="createWorkbook")
 
 
 class CollectionSchema(BaseUSContainerSchema):
-    collectionId = IDField()
-    parentId = IDField()
+    collection_id = IDField(data_key="collectionId")
+    parent_id = IDField(data_key="parent_id")
     permissions = ma.fields.Nested(CollectionPermissionsSchema)
 
 
 class WorkbookSchema(BaseUSContainerSchema):
-    workbookId = IDField()
-    collectionId = IDField()  # like `parentId` for collections, so not in the base class
+    workbook_id = IDField(data_key="workbookId")
+    collection_id = IDField(data_key="collectionId")  # like `parentId` for collections, so not in the base class
     permissions = ma.fields.Nested(BasePermissionsSchema)
 
 
 class EntrySchema(BaseUSEntitySchema):
+    class EntryPermissions(ma.Schema):
+        admin = ma.fields.Bool()
+        edit = ma.fields.Bool()
+        read = ma.fields.Bool()
+        execute = ma.fields.Bool()
+
     data = ma.fields.Dict()
+    unversioned_data = ma.fields.Dict(data_key="unversionedData")
     entry_id = ma.fields.String(data_key="entryId")
     key = ma.fields.String()
-    permissions = ma.fields.Dict()
+    permissions = ma.fields.Nested(EntryPermissions())
     published_id = ma.fields.String(data_key="publishedId")
     rev_id = ma.fields.String(data_key="revId")
     saved_id = ma.fields.String(data_key="savedId")
     scope = ma.fields.String()
-    type_ = ma.fields.String(data_key="type")
+    entry_type = ma.fields.String(data_key="type")
     workbook_id = ma.fields.String(data_key="workbookId")
+    hidden = ma.fields.Bool()

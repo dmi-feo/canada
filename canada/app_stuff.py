@@ -1,3 +1,4 @@
+import inspect
 from dataclasses import dataclass
 
 from aiohttp.web import middleware
@@ -17,6 +18,11 @@ async def attach_services(request, handler):
     app_services = AppServices(
         WBManager(yt_cli=SimpleYtClient(yt_host=settings.YT_HOST))
     )
+    # FIXME: switch to class-based views without introspection
+    handler_arg_names = inspect.signature(handler).parameters.keys()
+    if "app_services" in handler_arg_names:
+        resp = await handler(request, app_services=app_services)
+    else:
+        resp = await handler(request)
 
-    resp = await handler(request, app_services=app_services)
     return resp

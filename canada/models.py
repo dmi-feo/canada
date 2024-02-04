@@ -5,9 +5,9 @@ from canada.id import ID
 
 @dataclass
 class Permissions:
-    listAccessBindings: bool
-    updateAccessBindings: bool
-    limitedView: bool
+    list_access_bindings: bool
+    update_access_bindings: bool
+    limited_view: bool
     view: bool
     update: bool
     copy: bool
@@ -19,38 +19,38 @@ class Permissions:
 
 @dataclass
 class BaseUSEntity:
-    tenantId: str | None
+    tenant_id: str | None
     meta: dict
-    createdBy: str
-    createdAt: str
-    updatedBy: str
-    updatedAt: str
+    created_by: str
+    created_at: str
+    updated_by: str
+    updated_at: str
 
 
 @dataclass
 class BaseUSContainer(BaseUSEntity):
     title: str
     description: str
-    projectId: str | None
+    project_id: str | None
 
 
 @dataclass
 class CollectionPermissions(Permissions):
-    createCollection: bool
-    createWorkbook: bool
+    create_collection: bool
+    create_workbook: bool
 
 
 @dataclass
 class Collection(BaseUSContainer):
-    collectionId: ID
-    parentId: ID | None
+    collection_id: ID
+    parent_id: ID | None
     permissions: CollectionPermissions
 
 
 @dataclass
 class Workbook(BaseUSContainer):
-    workbookId: ID
-    collectionId: ID  # like `parentId` for collections, so not in the base class
+    workbook_id: ID
+    collection_id: ID  # like `parentId` for collections, so not in the base class
     permissions: Permissions
 
 
@@ -63,12 +63,14 @@ class CollectionContent:
 @dataclass
 class Entry(BaseUSEntity):
     data: dict
-    entryId: ID
-    workbookId: ID
+    unversioned_data: dict
+    entry_id: ID
+    workbook_id: ID
     key: str  # TODO: really required?
     permissions: dict  # TODO: really required? then make a dataclass
-    publishedId: ID
-    revId: ID
-    savedId: ID
+    published_id: ID
+    rev_id: ID
+    saved_id: ID
     scope: str
-    type: str
+    entry_type: str
+    hidden: bool

@@ -2,6 +2,7 @@ import random
 import string
 
 import transliterate
+import slugify as slugify_lib
 
 
 def get_random_string(length):
@@ -11,5 +12,5 @@ def get_random_string(length):
     return result_str
 
 
-def simplify_string(title: str) -> str:
-    return transliterate.slugify(title)
+def slugify(text: str) -> str:
+    return slugify_lib.slugify(text, separator="_")  # TODO: separator="_"

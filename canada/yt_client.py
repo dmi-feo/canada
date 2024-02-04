@@ -97,6 +97,14 @@ class SimpleYtClient:
             params={"path": f"{node_path}/@{attr_name}", "encode_utf8": 0}, json_data=attr_value,
         )
 
+    # async def get_attributes(self, node_path: str, attr_names: list[str]) -> dict[str, str]:  # [str, Any]?
+    #     resp = await self.make_request(
+    #         "GET", "get",
+    #         params={"path": node_path, "encode_utf8": 0}, json_data={"attributes": attr_names},
+    #     )
+    #     data = await resp.json()
+    #     return data
+
     async def delete_node(self, node_path: str):
         await self.make_request(
             "POST", "remove",

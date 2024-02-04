@@ -14,8 +14,8 @@ router = web.RouteTableDef()
 @response_schema(sch.RootCollectionPermissionsResponse)
 async def get_root_collection_permissions(request, app_services: AppServices):
     return {
-        "createCollectionInRoot": True,
-        "createWorkbookInRoot": True,
+        "create_collection_in_root": True,
+        "create_workbook_in_root": True,
     }
 
 
@@ -28,9 +28,9 @@ async def collection_content(request, app_services: AppServices):
 
     return {
         "collections": coll_content.collections,
-        "collectionsNextPageToken": None,
+        "collections_next_page_token": None,
         "workbooks": coll_content.workbooks,
-        "workbooksNextPageToken": None,
+        "workbooks_next_page_token": None,
     }
 
 
@@ -56,7 +56,7 @@ async def delete_collection(request, app_services: AppServices):
 async def create_collection(request, verified_json: dict, app_services: AppServices):
     collection_id = await app_services.wbman.create_collection(
         title=verified_json["title"],
-        parent_id=ID.from_str(verified_json["parentId"]),
+        parent_id=ID.from_str(verified_json["parent_id"]),
         description=verified_json["description"],
     )
     data = await app_services.wbman.get_collection(collection_id)
@@ -70,13 +70,13 @@ async def get_collection_breadcrumbs(request, app_services: AppServices):
     collection = await app_services.wbman.get_collection(ID.from_str(collection_id))
 
     resp_data = [{
-        "collectionId": collection.collectionId,
+        "collection_id": collection.collection_id,
         "title": collection.title,
     }]
-    while collection.parentId:
-        collection = await app_services.wbman.get_collection(collection.parentId)
+    while collection.parent_id:
+        collection = await app_services.wbman.get_collection(collection.parent_id)
         resp_data.append({
-            "collectionId": collection.collectionId,
+            "collection_id": collection.collection_id,
             "title": collection.title,
         })
 
