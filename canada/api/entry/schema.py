@@ -32,6 +32,7 @@ class UpdateEntryRequest(ma.Schema):
     unversioned_data = ma.fields.Dict(data_key="unversionedData", load_default=None)
     mode = ma.fields.String()
     meta = ma.fields.Dict()
+    links = ma.fields.Dict()
 
 
 class UpdateEntryResponse(ma.Schema):

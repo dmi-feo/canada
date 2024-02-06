@@ -307,7 +307,11 @@ class WBManager:
     async def update_entry(self, entry_id: ID, entry_data: dict | None, unversioned_data: dict | None):
         async with self.yt:
             async with self.yt.transaction():
-                curr_entry = await self.get_entry(entry_id)
+                raw_data_str = await self.yt.read_file(entry_id.to_path())
+                attributes = await self.yt.get_node(entry_id.to_path())
+                raw_data = json.loads(raw_data_str)
+                curr_entry = deserialize_entry(raw_data, entry_id=entry_id, attributes=attributes)
+
                 new_data = entry_data if entry_data is not None else curr_entry.data
                 new_unversioned_data = unversioned_data if unversioned_data is not None else curr_entry.unversioned_data
                 await self.yt.write_file(
