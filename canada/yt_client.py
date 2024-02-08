@@ -1,4 +1,3 @@
-import json
 from contextlib import asynccontextmanager
 
 import aiohttp
@@ -47,7 +46,7 @@ class SimpleYtClient:
         else:
             await self.commit_transaction(tx_id)
 
-    async def start_transaction(self) -> str:
+    async def start_transaction(self) -> str:  # FIXME: it seems to not work
         resp = await self.make_request(
             "POST", "start_tx"
         )
@@ -58,57 +57,50 @@ class SimpleYtClient:
             "POST", "commit_tx", params={"transaction_id": transaction_id}
         )
 
-    async def create_file(self, file_path: str, ignore_existing: bool = True):
-        await self.make_request(
+    async def create_file(self, file_path: str, ignore_existing: bool = True) -> str:
+        resp = await self.make_request(
             "POST", "create",
             params={"path": file_path, "type": "file", "ignore_existing": int(ignore_existing)}
         )
+        data = await resp.json()
+        return data  # string with id
 
-    async def write_file(self, file_path: str, file_data: dict):
-        await self.make_request("PUT", "write_file", params={"path": file_path}, json_data=file_data)
+    async def write_file(self, node_id: str, file_data: dict):
+        await self.make_request("PUT", "write_file", params={"path": f"#{node_id}"}, json_data=file_data)
 
-    async def read_file(self, file_path: str):
-        resp = await self.make_request("GET", "read_file", params={"path": file_path})
+    async def read_file(self, node_id: str):
+        resp = await self.make_request("GET", "read_file", params={"path": f"#{node_id}"})
         return await resp.text()
 
-    async def get_node(self, node_path: str):
-        resp = await self.make_request("GET", "get", params={"path": f"{node_path}/@"})
+    async def get_node(self, node_id: str):
+        resp = await self.make_request("GET", "get", params={"path": f"#{node_id}/@"})
         return await resp.json()
 
-    async def list_dir(self, dir_path: str, attributes: list[str]):
-        # resp = await self.make_request(
-        #     "GET", "list", params={"path": f"{dir_path}"}
-        # )
+    async def list_dir(self, node_id: str, attributes: list[str]):
         resp = await self.make_request(
-            "POST", "list", json_data={"path": f"{dir_path}", "attributes": attributes},
+            "POST", "list", json_data={"path": f"#{node_id}", "attributes": attributes},
         )
         data = await resp.json()
         return data
 
-    async def create_dir(self, dir_path):
-        await self.make_request(
+    async def create_dir(self, dir_path: str) -> str:
+        resp = await self.make_request(
             "POST", "create",
             params={"path": dir_path, "type": "map_node", "ignore_existing": 0}
         )
+        data = await resp.json()
+        return data  # string with id
 
-    async def set_attribute(self, node_path: str, attr_name: str, attr_value: str):
+    async def set_attribute(self, node_id: str, attr_name: str, attr_value: str):
         await self.make_request(
             "PUT", "set",
-            params={"path": f"{node_path}/@{attr_name}", "encode_utf8": 0}, json_data=attr_value,
+            params={"path": f"#{node_id}/@{attr_name}", "encode_utf8": 0}, json_data=attr_value,
         )
 
-    # async def get_attributes(self, node_path: str, attr_names: list[str]) -> dict[str, str]:  # [str, Any]?
-    #     resp = await self.make_request(
-    #         "GET", "get",
-    #         params={"path": node_path, "encode_utf8": 0}, json_data={"attributes": attr_names},
-    #     )
-    #     data = await resp.json()
-    #     return data
-
-    async def delete_node(self, node_path: str):
+    async def delete_node(self, node_id: str):
         await self.make_request(
             "POST", "remove",
-            json_data={"path": node_path}
+            json_data={"path": f"#{node_id}"}
         )
 
 

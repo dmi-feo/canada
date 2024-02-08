@@ -1,10 +1,16 @@
 from canada.settings import YT_HOME_PREFIX
 
 
+class ID(str):
+    @property
+    def pseudo_path(self):
+        return f"#{self}"
+
+
 DELIMITER = "."
 
 
-class ID:
+class ID_:
     def __init__(self, parts: list[str]):
         self._parts: list[str] = parts
 

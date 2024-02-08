@@ -19,13 +19,13 @@ class InternalObject(ma.Schema):
 
 
 class CollectionBreadcrumbsResponse(TopLevelSchema):
-    _toplevel = ma.fields.Nested(InternalObject, many=True)
+    _toplevel = ma.fields.Nested(InternalObject(), many=True)
 
 
 class CollectionContentResponseSchema(ma.Schema):
-    collections = ma.fields.Nested(bsch.CollectionSchema, many=True)
+    collections = ma.fields.Nested(bsch.CollectionSchema(), many=True)
     collections_next_page_token = ma.fields.Bool(data_key="collectionsNextPageToken")
-    workbooks = ma.fields.Nested(bsch.WorkbookSchema, many=True)
+    workbooks = ma.fields.Nested(bsch.WorkbookSchema(), many=True)
     workbooks_next_page_token = ma.fields.Bool(data_key="workbooksNextPageToken")
 
 

@@ -42,15 +42,15 @@ class CollectionPermissions(Permissions):
 
 @dataclass
 class Collection(BaseUSContainer):
-    collection_id: ID
-    parent_id: ID | None
+    collection_id: str
+    parent_id: str | None
     permissions: CollectionPermissions
 
 
 @dataclass
 class Workbook(BaseUSContainer):
-    workbook_id: ID
-    collection_id: ID  # like `parentId` for collections, so not in the base class
+    workbook_id: str
+    collection_id: str  # like `parentId` for collections, so not in the base class
     permissions: Permissions
 
 
@@ -65,12 +65,12 @@ class Entry(BaseUSEntity):
     data: dict
     unversioned_data: dict
     entry_id: ID
-    workbook_id: ID
+    workbook_id: str
     key: str  # TODO: really required?
     permissions: dict  # TODO: really required? then make a dataclass
-    published_id: ID
-    rev_id: ID
-    saved_id: ID
+    published_id: str | None
+    rev_id: str | None
+    saved_id: str | None
     scope: str
     entry_type: str
     hidden: bool
