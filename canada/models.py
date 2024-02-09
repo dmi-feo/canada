@@ -64,7 +64,7 @@ class CollectionContent:
 class Entry(BaseUSEntity):
     data: dict
     unversioned_data: dict
-    entry_id: ID
+    entry_id: str
     workbook_id: str
     key: str  # TODO: really required?
     permissions: dict  # TODO: really required? then make a dataclass

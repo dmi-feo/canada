@@ -12,7 +12,7 @@ from canada import constants as const
 from canada.tools import slugify
 
 
-ROOT_COLLECTION_ID = "1-3db-12f-9851ad0e"
+ROOT_COLLECTION_ID = "1-1161-12f-93dbdaa4"
 
 
 # TODO: marshmallow
@@ -186,8 +186,8 @@ def deserialize_entry(raw_data: dict, entry_id: str, attributes: dict[str, str])
     return Entry(
         data=raw_data["data"],
         unversioned_data=raw_data["unversioned_data"],
-        entry_id=raw_data["$attributes"][const.YT_ATTR_ID],
-        workbook_id=raw_data["$attributes"]["parent_id"],
+        entry_id=attributes[const.YT_ATTR_ID],
+        workbook_id=attributes["parent_id"],
         key=attributes[const.YT_ATTR_DL_TITLE],
         permissions={"admin": True, "edit": True, "read": True, "execute": True},
         published_id=None,
