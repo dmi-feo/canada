@@ -275,10 +275,9 @@ class WBManager:
 
     async def get_entry(self, entry_id: str) -> Entry:
         async with self.yt:
-            raw_data_str = await self.yt.read_file(entry_id)
+            raw_data = await self.yt.read_document(entry_id)
             attributes = await self.yt.get_node(entry_id)
 
-        raw_data = json.loads(raw_data_str)
         return deserialize_entry(raw_data, entry_id=entry_id, attributes=attributes)
 
     async def create_entry(
@@ -289,10 +288,9 @@ class WBManager:
         new_node_path = f"#{parent_id}/{slugify(name)}"
         async with self.yt:
             async with self.yt.transaction():
-                entry_id = await self.yt.create_file(file_path=new_node_path)
-                await self.yt.write_file(
-                    node_id=entry_id,
-                    file_data={"data": entry_data, "unversioned_data": unversioned_data}
+                entry_id = await self.yt.create_document(
+                    node_path=new_node_path,
+                    data={"data": entry_data, "unversioned_data": unversioned_data}
                 )
                 await self.yt.set_attribute(entry_id, const.YT_ATTR_DL_TYPE, "entry")
                 await self.yt.set_attribute(entry_id, const.YT_ATTR_DL_TITLE, name)
@@ -304,14 +302,13 @@ class WBManager:
     async def update_entry(self, entry_id: str, entry_data: dict | None, unversioned_data: dict | None):
         async with self.yt:
             async with self.yt.transaction():
-                raw_data_str = await self.yt.read_file(entry_id)
+                raw_data = await self.yt.read_document(entry_id)
                 attributes = await self.yt.get_node(entry_id)
-                raw_data = json.loads(raw_data_str)
                 curr_entry = deserialize_entry(raw_data, entry_id=entry_id, attributes=attributes)
 
                 new_data = entry_data if entry_data is not None else curr_entry.data
                 new_unversioned_data = unversioned_data if unversioned_data is not None else curr_entry.unversioned_data
-                await self.yt.write_file(
+                await self.yt.write_document(
                     node_id=entry_id,
-                    file_data={"data": new_data, "unversioned_data": new_unversioned_data}
+                    data={"data": new_data, "unversioned_data": new_unversioned_data}
                 )

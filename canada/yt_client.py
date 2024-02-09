@@ -72,6 +72,22 @@ class SimpleYtClient:
         resp = await self.make_request("GET", "read_file", params={"path": f"#{node_id}"})
         return await resp.text()
 
+    async def create_document(self, node_path: str, data: dict, ignore_existing: bool = True) -> str:
+        resp = await self.make_request(
+            "POST", "create",
+            params={"path": node_path, "type": "document", "ignore_existing": int(ignore_existing)},
+            json_data={"attributes": {"value": data}}
+        )
+        data = await resp.json()
+        return data  # string with id
+
+    async def write_document(self, node_id: str, data: dict):
+        await self.make_request("PUT", "set", params={"path": f"#{node_id}"}, json_data=data)
+
+    async def read_document(self, node_id: str):
+        resp = await self.make_request("GET", "get", params={"path": f"#{node_id}"})
+        return await resp.json()
+
     async def get_node(self, node_id: str):
         resp = await self.make_request("GET", "get", params={"path": f"#{node_id}/@"})
         return await resp.json()
