@@ -1,10 +1,6 @@
 import marshmallow as ma
 
 
-class IDField(ma.fields.String):
-    pass
-
-
 class BaseUSEntitySchema(ma.Schema):
     meta = ma.fields.Dict()
     created_by = ma.fields.String(data_key="createdBy")  # TODO: consider datetime
@@ -17,7 +13,7 @@ class BaseUSEntitySchema(ma.Schema):
 class BaseUSContainerSchema(BaseUSEntitySchema):
     title = ma.fields.String()
     description = ma.fields.String()
-    parent_id = IDField(data_key="parentId")
+    parent_id = ma.fields.String(data_key="parentId")
     project_id = ma.fields.String(data_key="projectId")
 
 
@@ -40,14 +36,14 @@ class CollectionPermissionsSchema(BasePermissionsSchema):
 
 
 class CollectionSchema(BaseUSContainerSchema):
-    collection_id = IDField(data_key="collectionId")
-    parent_id = IDField(data_key="parent_id")
+    collection_id = ma.fields.String(data_key="collectionId")
+    parent_id = ma.fields.String(data_key="parent_id")
     permissions = ma.fields.Nested(CollectionPermissionsSchema)
 
 
 class WorkbookSchema(BaseUSContainerSchema):
-    workbook_id = IDField(data_key="workbookId")
-    collection_id = IDField(data_key="collectionId")  # like `parentId` for collections, so not in the base class
+    workbook_id = ma.fields.String(data_key="workbookId")
+    collection_id = ma.fields.String(data_key="collectionId")  # like `parentId` for collections, so not in the base class
     permissions = ma.fields.Nested(BasePermissionsSchema)
 
 

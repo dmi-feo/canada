@@ -14,7 +14,7 @@ class CollectionResponseSchema(base_schema.CollectionSchema):
 
 
 class InternalObject(ma.Schema):
-    collection_id = base_schema.IDField(data_key="collectionId")
+    collection_id = ma.fields.String(data_key="collectionId")
     title = ma.fields.String()
 
 
@@ -31,9 +31,13 @@ class CollectionContentResponseSchema(ma.Schema):
 
 class CreateCollectionRequest(ma.Schema):
     title = ma.fields.String()
-    parent_id = base_schema.IDField(allow_none=True, data_key="parentId")
+    parent_id = ma.fields.String(allow_none=True, data_key="parentId")
     description = ma.fields.String()
 
 
 class CreateCollectionResponse(base_schema.CollectionSchema):
     pass
+
+
+class CollectionRequestParams(ma.Schema):
+    collection_id = ma.fields.String(data_key="collectionId")

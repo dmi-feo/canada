@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from canada.id import ID
-
 
 @dataclass
 class Permissions:
