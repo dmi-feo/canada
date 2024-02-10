@@ -2,8 +2,6 @@ from contextlib import asynccontextmanager
 
 import aiohttp
 
-from .settings import YT_HOST
-
 
 class SimpleYtClient:
     def __init__(self, yt_host: str):
@@ -118,7 +116,3 @@ class SimpleYtClient:
             "POST", "remove",
             json_data={"path": f"#{node_id}"}
         )
-
-
-def get_yt_cli():
-    return SimpleYtClient(yt_host=YT_HOST)
