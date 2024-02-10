@@ -3,10 +3,15 @@ from contextlib import asynccontextmanager
 import aiohttp
 
 
+class TxAlreadyStarted(Exception):
+    pass
+
+
 class SimpleYtClient:
     def __init__(self, yt_host: str):
         self.yt_host = yt_host
         self._session: aiohttp.ClientSession()
+        self._curr_tx_id: str | None = None
 
     async def __aenter__(self):
         self._session = aiohttp.ClientSession()
@@ -26,6 +31,10 @@ class SimpleYtClient:
             "X-YT-Header-Format": "<format=text>yson"
         })
         params = params or {}
+
+        if self._curr_tx_id is not None:
+            params["transaction_id"] = self._curr_tx_id
+
         resp = await self._session.request(
             method=method, url=f"{self.yt_host}/api/v3/{url}",
             params=params, headers=headers, json=json_data,
@@ -36,23 +45,33 @@ class SimpleYtClient:
 
     @asynccontextmanager
     async def transaction(self):
-        tx_id = await self.start_transaction()  # TODO: pass tx_id to all operations?
+        if self._curr_tx_id is not None:
+            raise TxAlreadyStarted()
+        self._curr_tx_id = await self.start_transaction()  # TODO: pass tx_id to all operations?
         try:
             yield
         except Exception:
+            await self.abort_transaction(self._curr_tx_id)
             raise
         else:
-            await self.commit_transaction(tx_id)
+            await self.commit_transaction(self._curr_tx_id)
+        finally:
+            self._curr_tx_id = None
 
     async def start_transaction(self) -> str:  # FIXME: it seems to not work
         resp = await self.make_request(
             "POST", "start_tx"
         )
-        return (await resp.text())[1:-1]
+        return await resp.json()
 
     async def commit_transaction(self, transaction_id: str):
         await self.make_request(
             "POST", "commit_tx", params={"transaction_id": transaction_id}
+        )
+
+    async def abort_transaction(self, transaction_id: str):
+        await self.make_request(
+            "POST", "abort_tx", params={"transaction_id": transaction_id}
         )
 
     async def create_file(self, file_path: str, ignore_existing: bool = True) -> str:
