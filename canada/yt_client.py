@@ -47,7 +47,7 @@ class SimpleYtClient:
     async def transaction(self):
         if self._curr_tx_id is not None:
             raise TxAlreadyStarted()
-        self._curr_tx_id = await self.start_transaction()  # TODO: pass tx_id to all operations?
+        self._curr_tx_id = await self.start_transaction()
         try:
             yield
         except Exception:
@@ -58,7 +58,7 @@ class SimpleYtClient:
         finally:
             self._curr_tx_id = None
 
-    async def start_transaction(self) -> str:  # FIXME: it seems to not work
+    async def start_transaction(self) -> str:
         resp = await self.make_request(
             "POST", "start_tx"
         )
@@ -105,7 +105,7 @@ class SimpleYtClient:
         resp = await self.make_request("GET", "get", params={"path": f"#{node_id}"})
         return await resp.json()
 
-    async def get_node(self, node_id: str):
+    async def get_node_attributes(self, node_id: str):
         resp = await self.make_request("GET", "get", params={"path": f"#{node_id}/@"})
         return await resp.json()
 

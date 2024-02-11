@@ -122,7 +122,7 @@ class WBManager:
 
     async def get_collection(self, coll_id: str) -> Collection:
         async with self.yt:
-            coll_dir = await self.yt.get_node(coll_id)
+            coll_dir = await self.yt.get_node_attributes(coll_id)
         return deserialize_collection(coll_dir)
 
     async def create_collection(self, title: str, parent_id: str | None, description: str = "") -> str:
@@ -143,7 +143,7 @@ class WBManager:
 
     async def get_workbook(self, wb_id: str) -> Workbook:
         async with self.yt:
-            wb_dir = await self.yt.get_node(wb_id)
+            wb_dir = await self.yt.get_node_attributes(wb_id)
         return deserialize_workbook(wb_dir)
 
     async def create_workbook(self, title: str, collection_id: str, description: str = "") -> str:
@@ -167,7 +167,7 @@ class WBManager:
     async def get_entry(self, entry_id: str) -> Entry:
         async with self.yt:
             raw_data = await self.yt.read_document(entry_id)
-            attributes = await self.yt.get_node(entry_id)
+            attributes = await self.yt.get_node_attributes(entry_id)
 
         return deserialize_entry(raw_data, attributes=attributes)
 
@@ -194,7 +194,7 @@ class WBManager:
         async with self.yt:
             async with self.yt.transaction():
                 raw_data = await self.yt.read_document(entry_id)
-                attributes = await self.yt.get_node(entry_id)
+                attributes = await self.yt.get_node_attributes(entry_id)
                 curr_entry = deserialize_entry(raw_data, attributes=attributes)
 
                 new_data = entry_data if entry_data is not None else curr_entry.data
