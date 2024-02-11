@@ -10,6 +10,7 @@ class TxAlreadyStarted(Exception):
 class SimpleYtClient:
     def __init__(self, yt_host: str):
         self.yt_host = yt_host
+        # client must be created per requests, so it's not going to be an issue
         self._session: aiohttp.ClientSession()
         self._curr_tx_id: str | None = None
 
