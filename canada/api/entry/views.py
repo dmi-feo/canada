@@ -1,8 +1,13 @@
+from __future__ import annotations
+import typing
+
 from aiohttp import web
 
-from canada.app_stuff import AppServices
 from canada.aiohttp_marshmallow.base import response_schema, request_schema
 from canada.api.entry import schema
+
+if typing.TYPE_CHECKING:
+    from canada.app_stuff import AppServices
 
 
 router = web.RouteTableDef()

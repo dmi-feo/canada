@@ -1,9 +1,14 @@
-import marshmallow
+from __future__ import annotations
+import typing
+
 from aiohttp import web
 
 import canada.api.collection.schema as sch
 from canada.aiohttp_marshmallow.base import response_schema, request_schema
-from canada.app_stuff import AppServices
+from canada.wb_manager.exc import RootCollectionCannotBeRequested
+
+if typing.TYPE_CHECKING:
+    from canada.app_stuff import AppServices
 
 
 router = web.RouteTableDef()
@@ -42,7 +47,7 @@ async def get_collection(request, app_services: AppServices):
 
 
 @router.delete("/v1/collections/{collection_id}")
-@response_schema(marshmallow.Schema)
+@response_schema(sch.DeleteCollectionResponse)
 async def delete_collection(request, app_services: AppServices):
     collection_id = request.match_info["collection_id"]
     await app_services.wbman.delete_collection(collection_id)
@@ -73,7 +78,10 @@ async def get_collection_breadcrumbs(request, app_services: AppServices):
         "title": collection.title,
     }]
     while collection.parent_id:
-        collection = await app_services.wbman.get_collection(collection.parent_id)
+        try:
+            collection = await app_services.wbman.get_collection(collection.parent_id)
+        except RootCollectionCannotBeRequested:
+            break
         resp_data.append({
             "collection_id": collection.collection_id,
             "title": collection.title,

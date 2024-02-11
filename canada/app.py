@@ -16,7 +16,10 @@ def create_app() -> web.Application:
     logging.basicConfig(level=logging.DEBUG)
     app_instance = web.Application(
         middlewares=[
-            attach_services(yt_cli_factory=lambda: SimpleYtClient(yt_host=settings.YT_HOST)),
+            attach_services(
+                yt_cli_factory=lambda: SimpleYtClient(yt_host=settings.YT_HOST),
+                root_collection_node_id=settings.ROOT_COLLECTION_NODE_ID,
+            ),
         ]
     )
 

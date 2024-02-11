@@ -1,0 +1,2 @@
+class RootCollectionCannotBeRequested(Exception):
+    pass

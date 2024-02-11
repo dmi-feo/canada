@@ -1,1 +1,5 @@
-YT_HOST = "http://158.160.35.83:38000"
+import os
+
+
+YT_HOST = os.environ["YT_HOST"]
+ROOT_COLLECTION_NODE_ID = os.environ["ROOT_COLLECTION_NODE_ID"]

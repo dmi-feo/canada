@@ -39,5 +39,5 @@ class CreateCollectionResponse(base_schema.CollectionSchema):
     pass
 
 
-class CollectionRequestParams(ma.Schema):
-    collection_id = ma.fields.String(data_key="collectionId")
+class DeleteCollectionResponse(ma.Schema):
+    pass
