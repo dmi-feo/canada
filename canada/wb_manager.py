@@ -1,7 +1,3 @@
-from typing import Type
-
-import marshmallow as ma
-
 from canada.yt_client import SimpleYtClient
 from canada.models import (
     CollectionContent, Workbook, Collection,
