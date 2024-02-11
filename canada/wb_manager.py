@@ -5,10 +5,9 @@ import marshmallow as ma
 from canada.yt_client import SimpleYtClient
 from canada.models import (
     CollectionContent, Workbook, Collection,
-    Permissions, CollectionPermissions, Entry, BaseUSEntity
+    Permissions, CollectionPermissions, Entry
 )
 from canada import constants as const
-from canada.tools import slugify
 
 
 ROOT_COLLECTION_ID = "1-1161-12f-93dbdaa4"
@@ -127,7 +126,7 @@ class WBManager:
 
     async def create_collection(self, title: str, parent_id: str | None, description: str = "") -> str:
         parent_id = parent_id or ROOT_COLLECTION_ID
-        new_node_path = f"#{parent_id}/{slugify(title)}"
+        new_node_path = f"#{parent_id}/{title}"
         async with self.yt:
             async with self.yt.transaction():
                 node_id = await self.yt.create_dir(new_node_path)
@@ -148,7 +147,7 @@ class WBManager:
 
     async def create_workbook(self, title: str, collection_id: str, description: str = "") -> str:
         parent_id = collection_id or ROOT_COLLECTION_ID
-        new_node_path = f"#{parent_id}/{slugify(title)}"
+        new_node_path = f"#{parent_id}/{title}"
         async with self.yt:
             async with self.yt.transaction():
                 node_id = await self.yt.create_dir(new_node_path)
@@ -176,7 +175,7 @@ class WBManager:
             scope: str, entry_type: str
     ) -> str:
         parent_id = workbook_id or ROOT_COLLECTION_ID
-        new_node_path = f"#{parent_id}/{slugify(name)}"
+        new_node_path = f"#{parent_id}/{name}"
         async with self.yt:
             async with self.yt.transaction():
                 entry_id = await self.yt.create_document(
