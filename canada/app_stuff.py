@@ -16,7 +16,7 @@ class AppServices:
 @middleware
 async def attach_services(request, handler):
     app_services = AppServices(
-        WBManager(yt_cli=SimpleYtClient(yt_host=settings.YT_HOST))
+        WBManager(yt_cli=SimpleYtClient(yt_host=settings.YT_HOST))  # TODO: take client factory from app
     )
     # FIXME: switch to class-based views without introspection
     handler_arg_names = inspect.signature(handler).parameters.keys()
