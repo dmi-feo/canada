@@ -39,3 +39,4 @@ async def test_create_and_delete_collection(client, wb_manager):
     async with collection(client, title=coll_title) as coll_id:
         coll_obj = await wb_manager.get_collection(coll_id)
         assert coll_obj.title == coll_title
+    # TODO: check the collection was really deleted
