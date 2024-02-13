@@ -9,10 +9,10 @@ import canada.api.workbook.views
 import canada.api.entry.views
 
 from canada.yt_client import SimpleYtClient
-from canada import settings
+from canada.settings import CanadaSettings
 
 
-def create_app() -> web.Application:
+def create_app(settings: CanadaSettings) -> web.Application:
     logging.basicConfig(level=logging.DEBUG)
     app_instance = web.Application(
         middlewares=[
@@ -29,7 +29,7 @@ def create_app() -> web.Application:
 
 
 async def gunicorn_app() -> web.Application:
-    return create_app()
+    return create_app(settings=CanadaSettings.from_env())
 
 
 def configure_routes(app_instance: web.Application):
@@ -39,5 +39,5 @@ def configure_routes(app_instance: web.Application):
 
 
 if __name__ == "__main__":
-    app = create_app()
+    app = create_app(settings=CanadaSettings.from_env())
     web.run_app(app, port=8888)
