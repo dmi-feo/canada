@@ -28,6 +28,10 @@ def create_app() -> web.Application:
     return app_instance
 
 
+async def gunicorn_app() -> web.Application:
+    return create_app()
+
+
 def configure_routes(app_instance: web.Application):
     app_instance.add_routes(canada.api.entry.views.router)
     app_instance.add_routes(canada.api.workbook.views.router)
