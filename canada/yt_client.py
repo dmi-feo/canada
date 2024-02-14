@@ -1,44 +1,74 @@
+import abc
+import ssl
 from contextlib import asynccontextmanager
 
 import aiohttp
+import attr
+
+from canada import constants
 
 
 class TxAlreadyStarted(Exception):
     pass
 
 
+class YTAuthContext(abc.ABC):
+    def add_auth(self, cookies: dict[str, str], headers: dict[str, str]):
+        pass
+
+
+class YTNoAuthContext(YTAuthContext):
+    pass
+
+
+@attr.s(slots=True)
+class YTCookieAuthContext(YTAuthContext):
+    cypress_cookie: str = attr.ib(repr=False)
+    csrf_token: str = attr.ib(repr=False)
+
+    def add_auth(self, cookies: dict[str, str], headers: dict[str, str]):
+        cookies[constants.YT_COOKIE_TOKEN_NAME] = self.cypress_cookie
+        headers[constants.YT_HEADER_CSRF_NAME] = self.csrf_token
+
+
+@attr.s(slots=True)
 class SimpleYtClient:
-    def __init__(self, yt_host: str):
-        self.yt_host = yt_host
-        # client must be created per requests, so it's not going to be an issue
-        self._session: aiohttp.ClientSession()
-        self._curr_tx_id: str | None = None
+    yt_host: str = attr.ib()
+    auth_context: YTAuthContext = attr.ib()
+    ca_file: str = attr.ib(default=None)
+    _curr_tx_id: str | None = attr.ib(default=None)
+    _session: aiohttp.ClientSession | None = attr.ib(default=None)
 
     async def __aenter__(self):
-        self._session = aiohttp.ClientSession()
+        ssl_context = ssl.create_default_context(cafile=self.ca_file)
+        self._session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self._session.close()
 
     async def make_request(
-            self, method: str, url: str, params: dict = None, headers=None,
-            json_data: dict | str | None = None
+            self, method: str, url: str, params: dict | None = None, headers: dict | None = None,
+            json_data: dict | str | None = None, cookies: dict | None = None
     ):
         headers = headers or {}
         headers.update({
             "X-YT-Input-Format": "<encode_utf8=%false>json",
             "X-YT-Output-Format": "<encode_utf8=%false>json",
-            "X-YT-Header-Format": "<format=text>yson"
+            "X-YT-Header-Format": "<format=text>yson",
         })
-        params = params or {}
 
+        params = params or {}
         if self._curr_tx_id is not None:
             params["transaction_id"] = self._curr_tx_id
 
+        cookies = cookies or {}
+
+        self.auth_context.add_auth(cookies=cookies, headers=headers)  # TODO FIXME: it's ugly
+
         resp = await self._session.request(
             method=method, url=f"{self.yt_host}/api/v3/{url}",
-            params=params, headers=headers, json=json_data,
+            params=params, headers=headers, json=json_data, cookies=cookies,
         )
         print(resp.status, resp.headers)
         resp.raise_for_status()

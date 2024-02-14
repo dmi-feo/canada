@@ -25,6 +25,9 @@ YT_ATTRS_TO_REQ = [
     YT_ATTR_OWNER,
 ]
 
+YT_COOKIE_TOKEN_NAME = "YTCypressCookie"
+YT_HEADER_CSRF_NAME = "X-Csrf-Token"
+
 DL_COLLECTION_TYPE = "collection"
 DL_WORKBOOK_TYPE = "workbook"
 DL_ENTRY_TYPE = "entry"
