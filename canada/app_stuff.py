@@ -18,7 +18,7 @@ def attach_services(
     @middleware
     async def attach_services_mw(request, handler):
         app_services = AppServices(
-            WBManager(yt_cli=yt_cli_factory(), root_collection_node_id=root_collection_node_id)
+            WBManager(yt_cli=yt_cli_factory(request), root_collection_node_id=root_collection_node_id)
         )
         # FIXME: switch to class-based views without introspection
         handler_arg_names = inspect.signature(handler).parameters.keys()
