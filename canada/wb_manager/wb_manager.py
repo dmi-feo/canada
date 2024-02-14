@@ -50,8 +50,6 @@ class WBManager:
             async with self.yt.transaction():
                 node_id = await self.yt.create_dir(new_node_path)
                 await self.yt.set_attribute(node_id, const.YT_ATTR_DL_TYPE, const.DL_COLLECTION_TYPE)
-                await self.yt.set_attribute(node_id, const.YT_ATTR_DL_TITLE, title)
-                await self.yt.set_attribute(node_id, const.YT_ATTR_DL_DESCRIPTION, description)
 
         return node_id
 
@@ -71,8 +69,6 @@ class WBManager:
             async with self.yt.transaction():
                 node_id = await self.yt.create_dir(new_node_path)
                 await self.yt.set_attribute(node_id, const.YT_ATTR_DL_TYPE, const.DL_WORKBOOK_TYPE)
-                await self.yt.set_attribute(node_id, const.YT_ATTR_DL_TITLE, title)
-                await self.yt.set_attribute(node_id, const.YT_ATTR_DL_DESCRIPTION, description)
 
         return node_id
 
@@ -102,7 +98,6 @@ class WBManager:
                     data={"data": entry_data, "unversioned_data": unversioned_data}
                 )
                 await self.yt.set_attribute(entry_id, const.YT_ATTR_DL_TYPE, const.DL_ENTRY_TYPE)
-                await self.yt.set_attribute(entry_id, const.YT_ATTR_DL_TITLE, name)
                 await self.yt.set_attribute(entry_id, const.YT_ATTR_DL_ENTRY_SCOPE, scope)
                 await self.yt.set_attribute(entry_id, const.YT_ATTR_DL_ENTRY_TYPE, entry_type)
 
