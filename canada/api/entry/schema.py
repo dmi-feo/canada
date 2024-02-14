@@ -37,3 +37,7 @@ class UpdateEntryRequest(ma.Schema):
 
 class UpdateEntryResponse(ma.Schema):
     entry_id = ma.fields.String(data_key="entryId")
+
+
+class GetEntryMeta(ma.Schema):
+    pass  # no idea what should be returned - apparently it doesn't matter at all

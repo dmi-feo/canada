@@ -52,3 +52,9 @@ async def update_entry(request, verified_json: dict, app_services: AppServices):
     )
 
     return {"entry_id": entry_id}
+
+
+@router.get("/v1/entries/{entry_id}/meta")
+@response_schema(schema.GetEntryMeta)
+async def get_entry_meta(request, app_services: AppServices):
+    return {}
