@@ -40,4 +40,6 @@ class UpdateEntryResponse(ma.Schema):
 
 
 class GetEntryMeta(ma.Schema):
-    pass  # no idea what should be returned - apparently it doesn't matter at all
+    # no idea what should be returned - apparently it doesn't matter at all
+    # https://github.com/datalens-tech/datalens-ui/commit/80238ac7145f3684180a9177f86f66550d12f457#diff-ff70a027a67830c9bc9b102debb7b6f657a72d5101040edeec8636d90247d263R212
+    pass
