@@ -1,8 +1,6 @@
-version: "3.7"
-
 services:
   pg-compeng:
-    container_name: datalens-pg-compeng
+    container_name: canada-dev-dl-pg-compeng
     image: postgres:13-alpine
     environment:
       POSTGRES_PASSWORD: "postgres"
@@ -10,8 +8,8 @@ services:
       POSTGRES_USER: postgres
 
   control-api:
-    container_name: datalens-control-api
-    image: ghcr.io/datalens-tech/datalens-control-api:0.2038.1
+    container_name: canada-dev-dl-control-api
+    image: sha256:c0c3af4c29e02096163b6cf188c8ea220c2e099a278b459f2fcab1553a582188
     environment:
       BI_API_UWSGI_WORKERS_COUNT: 4
       CONNECTOR_AVAILABILITY_VISIBLE: "clickhouse,postgres,chyt"
@@ -30,8 +28,8 @@ services:
       - ./backend-configs:/etc/backend-configs
 
   data-api:
-    container_name: datalens-data-api
-    image: ghcr.io/datalens-tech/datalens-data-api:0.2038.1
+    container_name: canada-dev-dl-data-api
+    image: sha256:3d42f375aa48219b7fe5e00a901dafa2f8ce41fefb0fa9d4e36f657629e50100
     environment:
       GUNICORN_WORKERS_COUNT: 5
       RQE_FORCE_OFF: 1
@@ -53,9 +51,13 @@ services:
       - ./backend-configs:/etc/backend-configs
 
   datalens-ui:
-    container_name: datalens-ui-built
+    container_name: canada-dev-dl-ui-built
     build:
       context: ../../../datalens-ui
+    develop:
+      watch:
+        - action: rebuild
+          path: ../../../datalens-ui
     ports:
       - 8080:80
     depends_on:
