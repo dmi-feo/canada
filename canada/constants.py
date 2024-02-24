@@ -1,3 +1,7 @@
+import enum
+from enum import Enum
+
+
 YT_ATTR_DL_TYPE = "dl_type"
 YT_ATTR_DL_ENTRY_TYPE = "dl_entry_type"
 YT_ATTR_DL_ENTRY_SCOPE = "dl_entry_scope"
@@ -34,3 +38,14 @@ YT_HEADER_CSRF_NAME = "X-Csrf-Token"
 DL_COLLECTION_TYPE = "collection"
 DL_WORKBOOK_TYPE = "workbook"
 DL_ENTRY_TYPE = "entry"
+
+
+class YTNodeType(enum.Enum):
+    map_node = "map_node"
+    document = "document"
+
+
+class CanadaEntityType(enum.Enum):
+    collection = "collection"
+    workbook = "workbook"
+    entry = "entry"

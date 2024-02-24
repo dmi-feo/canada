@@ -5,11 +5,14 @@ from typing import Callable, Coroutine, Any
 from aiohttp.web import middleware
 
 from canada.wb_manager.wb_manager import WBManager
+from canada.wb_manager.serialization import SimpleCanadaStorageSerializer
+from canada.api.serializer import BaseCanadaApiSerializer, SimpleCanadaApiSerializer
 
 
 @dataclass
 class AppServices:
     wbman: WBManager
+    api_serializer: BaseCanadaApiSerializer
 
 
 def attach_services(
@@ -18,7 +21,12 @@ def attach_services(
     @middleware
     async def attach_services_mw(request, handler):
         app_services = AppServices(
-            WBManager(yt_cli=yt_cli_factory(request), root_collection_node_id=root_collection_node_id)
+            wbman=WBManager(
+                yt_client=yt_cli_factory(request),
+                root_collection_node_id=root_collection_node_id,
+                serializer=SimpleCanadaStorageSerializer(),
+            ),
+            api_serializer=SimpleCanadaApiSerializer(),
         )
         # FIXME: switch to class-based views without introspection
         handler_arg_names = inspect.signature(handler).parameters.keys()

@@ -5,33 +5,32 @@ from canada.contrib.ma_top_level import TopLevelSchema
 
 
 class RootCollectionPermissionsResponse(ma.Schema):
-    create_collection_in_root = ma.fields.Bool(data_key="createCollectionInRoot")
-    create_workbook_in_root = ma.fields.Bool(data_key="createWorkbookInRoot")
+    createCollectionInRoot = ma.fields.Bool()
+    createWorkbookInRoot = ma.fields.Bool()
 
 
 class CollectionResponseSchema(base_schema.CollectionSchema):
     pass
 
 
-class InternalObject(ma.Schema):
-    collection_id = ma.fields.String(data_key="collectionId")
-    title = ma.fields.String()
-
-
 class CollectionBreadcrumbsResponse(TopLevelSchema):
-    _toplevel = ma.fields.Nested(InternalObject(), many=True)
+    class CollectionShortRepr(ma.Schema):
+        collectionId = ma.fields.String()
+        title = ma.fields.String()
+
+    _toplevel = ma.fields.Nested(CollectionShortRepr(), many=True)
 
 
 class CollectionContentResponseSchema(ma.Schema):
     collections = ma.fields.Nested(bsch.CollectionSchema(), many=True)
-    collections_next_page_token = ma.fields.Bool(data_key="collectionsNextPageToken")
+    collectionsNextPageToken = ma.fields.String()
     workbooks = ma.fields.Nested(bsch.WorkbookSchema(), many=True)
-    workbooks_next_page_token = ma.fields.Bool(data_key="workbooksNextPageToken")
+    workbooksNextPageToken = ma.fields.String()
 
 
 class CreateCollectionRequest(ma.Schema):
     title = ma.fields.String()
-    parent_id = ma.fields.String(allow_none=True, data_key="parentId")
+    parentId = ma.fields.String(allow_none=True)
     description = ma.fields.String()
 
 

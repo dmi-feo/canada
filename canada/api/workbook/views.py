@@ -17,26 +17,23 @@ router = web.RouteTableDef()
 @request_schema(schema.CreateWorkbookRequest)
 @response_schema(schema.CreateWorkbookResponse)
 async def create_workbook(request, verified_json: dict, app_services: AppServices):
-    workbook_id = await app_services.wbman.create_workbook(
-        title=verified_json["title"],
-        collection_id=verified_json["collection_id"],
-        description=verified_json["description"],
-    )
-    data = await app_services.wbman.get_workbook(workbook_id)
-    return data
+    workbook = app_services.api_serializer.deserialize_workbook(verified_json)
+    workbook_id = await app_services.wbman.create_workbook(workbook)
+    workbook = await app_services.wbman.get_workbook(workbook_id)
+    return app_services.api_serializer.serialize_workbook(workbook)
 
 
 @router.get('/v2/workbooks/{workbook_id}')
 @response_schema(schema.GetWorkbookResponse)
 async def get_workbook(request, app_services: AppServices):
     workbook_id = request.match_info["workbook_id"]
-    data = await app_services.wbman.get_workbook(workbook_id)
-    return data
+    workbook = await app_services.wbman.get_workbook(workbook_id)
+    return app_services.api_serializer.serialize_workbook(workbook)
 
 
 @router.get("/v2/workbooks/{workbook_id}/entries")
 @response_schema(schema.GetWorkbookEntriesResponse)
 async def get_workbook_entries(request, app_services: AppServices):
     workbook_id = request.match_info["workbook_id"]
-    data = await app_services.wbman.get_workbook_entries(workbook_id)
-    return {"entries": data}
+    entries = await app_services.wbman.get_workbook_entries(workbook_id)
+    return {"entries": [app_services.api_serializer.serialize_entry(entry) for entry in entries]}

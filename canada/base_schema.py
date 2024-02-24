@@ -3,24 +3,24 @@ import marshmallow as ma
 
 class BaseUSEntitySchema(ma.Schema):
     meta = ma.fields.Dict()
-    created_by = ma.fields.String(data_key="createdBy")  # TODO: consider datetime
-    created_at = ma.fields.String(data_key="createdAt")
-    updated_by = ma.fields.String(data_key="updatedBy")
-    updated_at = ma.fields.String(data_key="updatedAt")
-    tenant_id = ma.fields.String(data_key="tenantId")
+    createdBy = ma.fields.String()
+    createdAt = ma.fields.String()
+    updatedBy = ma.fields.String()
+    updatedAt = ma.fields.String()
+    tenantId = ma.fields.String()
 
 
 class BaseUSContainerSchema(BaseUSEntitySchema):
     title = ma.fields.String()
     description = ma.fields.String()
-    parent_id = ma.fields.String(data_key="parentId")
-    project_id = ma.fields.String(data_key="projectId")
+    parentId = ma.fields.String()
+    projectId = ma.fields.String()
 
 
 class BasePermissionsSchema(ma.Schema):
-    list_access_bindings = ma.fields.Bool(data_key="listAccessBindings")
-    update_access_bindings = ma.fields.Bool(data_key="updateAccessBindings")
-    limited_view = ma.fields.Bool(data_key="limitedView")
+    listAccessBindings = ma.fields.Bool()
+    updateAccessBindings = ma.fields.Bool()
+    limitedView = ma.fields.Bool()
     view = ma.fields.Bool()
     update = ma.fields.Bool()
     copy = ma.fields.Bool()
@@ -31,20 +31,18 @@ class BasePermissionsSchema(ma.Schema):
 
 
 class CollectionPermissionsSchema(BasePermissionsSchema):
-    create_collection = ma.fields.Bool(data_key="createCollection")
-    create_workbook = ma.fields.Bool(data_key="createWorkbook")
+    createCollection = ma.fields.Bool()
+    createWorkbook = ma.fields.Bool()
 
 
 class CollectionSchema(BaseUSContainerSchema):
-    collection_id = ma.fields.String(data_key="collectionId")
-    parent_id = ma.fields.String(data_key="parent_id")
-    permissions = ma.fields.Nested(CollectionPermissionsSchema)
+    collectionId = ma.fields.String()
+    permissions = ma.fields.Nested(CollectionPermissionsSchema())
 
 
 class WorkbookSchema(BaseUSContainerSchema):
-    workbook_id = ma.fields.String(data_key="workbookId")
-    collection_id = ma.fields.String(data_key="collectionId")  # like `parentId` for collections, so not in the base class
-    permissions = ma.fields.Nested(BasePermissionsSchema)
+    workbookId = ma.fields.String()
+    permissions = ma.fields.Nested(BasePermissionsSchema())
 
 
 class EntrySchema(BaseUSEntitySchema):
@@ -55,14 +53,14 @@ class EntrySchema(BaseUSEntitySchema):
         execute = ma.fields.Bool()
 
     data = ma.fields.Dict()
-    unversioned_data = ma.fields.Dict(data_key="unversionedData")
-    entry_id = ma.fields.String(data_key="entryId")
+    unversionedData = ma.fields.Dict()
+    entryId = ma.fields.String()
     key = ma.fields.String()
     permissions = ma.fields.Nested(EntryPermissions())
-    published_id = ma.fields.String(data_key="publishedId")
-    rev_id = ma.fields.String(data_key="revId")
-    saved_id = ma.fields.String(data_key="savedId")
+    publishedId = ma.fields.String()
+    revId = ma.fields.String()
+    savedId = ma.fields.String()
     scope = ma.fields.String()
-    entry_type = ma.fields.String(data_key="type")
-    workbook_id = ma.fields.String(data_key="workbookId")
+    type = ma.fields.String()
+    workbookId = ma.fields.String()
     hidden = ma.fields.Bool()

@@ -18,8 +18,8 @@ router = web.RouteTableDef()
 @response_schema(sch.RootCollectionPermissionsResponse)
 async def get_root_collection_permissions(request, app_services: AppServices):
     return {
-        "create_collection_in_root": True,
-        "create_workbook_in_root": True,
+        "createCollectionInRoot": True,
+        "createWorkbookInRoot": True,
     }
 
 
@@ -31,10 +31,10 @@ async def collection_content(request, app_services: AppServices):
     coll_content = await app_services.wbman.list_collection(collection_id)
 
     return {
-        "collections": coll_content.collections,
-        "collections_next_page_token": None,
-        "workbooks": coll_content.workbooks,
-        "workbooks_next_page_token": None,
+        "collections": [app_services.api_serializer.serialize_collection(coll) for coll in coll_content.collections],
+        "collectionsNextPageToken": None,
+        "workbooks": [app_services.api_serializer.serialize_workbook(wb) for wb in coll_content.workbooks],
+        "workbooksNextPageToken": None,
     }
 
 
@@ -42,8 +42,8 @@ async def collection_content(request, app_services: AppServices):
 @response_schema(sch.CollectionResponseSchema)
 async def get_collection(request, app_services: AppServices):
     collection_id = request.match_info["collection_id"]
-    data = await app_services.wbman.get_collection(collection_id)
-    return data
+    collection = await app_services.wbman.get_collection(collection_id)
+    return app_services.api_serializer.serialize_collection(collection)
 
 
 @router.delete("/v1/collections/{collection_id}")
@@ -58,13 +58,10 @@ async def delete_collection(request, app_services: AppServices):
 @request_schema(sch.CreateCollectionRequest)
 @response_schema(sch.CreateCollectionResponse)
 async def create_collection(request, verified_json: dict, app_services: AppServices):
-    collection_id = await app_services.wbman.create_collection(
-        title=verified_json["title"],
-        parent_id=verified_json["parent_id"],
-        description=verified_json["description"],
-    )
-    data = await app_services.wbman.get_collection(collection_id)
-    return data
+    collection = app_services.api_serializer.deserialize_collection(verified_json)
+    collection_id = await app_services.wbman.create_collection(collection)
+    saved_collection = await app_services.wbman.get_collection(collection_id)
+    return app_services.api_serializer.serialize_collection(saved_collection)
 
 
 @router.get("/v1/collections/{collection_id}/breadcrumbs")
@@ -74,7 +71,7 @@ async def get_collection_breadcrumbs(request, app_services: AppServices):
     collection = await app_services.wbman.get_collection(collection_id)
 
     resp_data = [{
-        "collection_id": collection.collection_id,
+        "collectionId": collection.collection_id,
         "title": collection.title,
     }]
     while collection.parent_id:
@@ -83,7 +80,7 @@ async def get_collection_breadcrumbs(request, app_services: AppServices):
         except RootCollectionCannotBeRequested:
             break
         resp_data.append({
-            "collection_id": collection.collection_id,
+            "collectionId": collection.collection_id,
             "title": collection.title,
         })
 

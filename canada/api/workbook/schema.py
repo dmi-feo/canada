@@ -4,7 +4,7 @@ from canada.base_schema import WorkbookSchema, EntrySchema
 
 
 class CreateWorkbookRequest(ma.Schema):
-    collection_id = ma.fields.String(data_key="collectionId")
+    collectionId = ma.fields.String()
     title = ma.fields.String()
     description = ma.fields.String()
 

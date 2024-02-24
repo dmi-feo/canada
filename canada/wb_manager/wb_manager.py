@@ -1,4 +1,9 @@
-from canada.wb_manager.deserialization import deserialize_workbook, deserialize_collection, deserialize_entry
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+import attr
+
 from canada.wb_manager.exc import RootCollectionCannotBeRequested
 from canada.yt_client import SimpleYtClient
 from canada.models import (
@@ -7,25 +12,29 @@ from canada.models import (
 )
 from canada import constants as const
 
+if TYPE_CHECKING:
+    from canada.wb_manager.serialization import BaseCanadaStorageSerializer
 
+
+@attr.s
 class WBManager:
-    def __init__(self, yt_cli: SimpleYtClient, root_collection_node_id: str):
-        self.yt = yt_cli
-        self.root_collection_node_id = root_collection_node_id
+    yt_client: SimpleYtClient = attr.ib()
+    root_collection_node_id: str = attr.ib()
+    serializer: BaseCanadaStorageSerializer = attr.ib()
 
     async def list_collection(self, coll_id: str | None = None) -> CollectionContent:
         coll_id = coll_id or self.root_collection_node_id
-        async with self.yt:
-            dirs = await self.yt.list_dir(coll_id, attributes=const.YT_ATTRS_TO_REQ)
+        async with self.yt_client:
+            dirs = await self.yt_client.list_dir(coll_id, attributes=const.YT_ATTRS_TO_REQ)
 
         workbooks = [
-            deserialize_workbook(item[const.YT_LIST_ATTRS_KEY])
+            self.serializer.deserialize_workbook(item[const.YT_LIST_ATTRS_KEY])
             for item in dirs
             if item[const.YT_LIST_ATTRS_KEY][const.YT_ATTR_DL_TYPE] == const.DL_WORKBOOK_TYPE
         ]
 
         collections = [
-            deserialize_collection(item[const.YT_LIST_ATTRS_KEY])
+            self.serializer.deserialize_collection(item[const.YT_LIST_ATTRS_KEY])
             for item in dirs
             if (
                     item[const.YT_LIST_ATTRS_KEY][const.YT_ATTR_DL_TYPE] == const.DL_COLLECTION_TYPE and
@@ -39,80 +48,89 @@ class WBManager:
         if coll_id == self.root_collection_node_id:
             raise RootCollectionCannotBeRequested()
 
-        async with self.yt:
-            coll_dir = await self.yt.get_node_attributes(coll_id)
-        return deserialize_collection(coll_dir)
+        async with self.yt_client:
+            coll_dir = await self.yt_client.get_node_attributes(coll_id)
+        return self.serializer.deserialize_collection(coll_dir)
 
-    async def create_collection(self, title: str, parent_id: str | None, description: str = "") -> str:
-        parent_id = parent_id or self.root_collection_node_id
-        new_node_path = f"#{parent_id}/{title}"
-        async with self.yt:
-            async with self.yt.transaction():
-                node_id = await self.yt.create_dir(new_node_path)
-                await self.yt.set_attribute(node_id, const.YT_ATTR_DL_TYPE, const.DL_COLLECTION_TYPE)
+    async def create_collection(self, collection: Collection):
+        parent_id = collection.parent_id or self.root_collection_node_id
+        new_node_path = f"#{parent_id}/{collection.title}"
+        serialized = self.serializer.serialize_collection(collection)
+        async with self.yt_client:
+            async with self.yt_client.transaction():
+                node_id = await self.yt_client.create_dir(new_node_path)
+                for attr_key, attr_value in serialized.attributes.items():
+                    await self.yt_client.set_attribute(node_id, attr_key, attr_value)
 
         return node_id
 
     async def delete_collection(self, collection_id: str):
-        async with self.yt:
-            await self.yt.delete_node(collection_id)
+        async with self.yt_client:
+            await self.yt_client.delete_node(collection_id)
 
     async def get_workbook(self, wb_id: str) -> Workbook:
-        async with self.yt:
-            wb_dir = await self.yt.get_node_attributes(wb_id)
-        return deserialize_workbook(wb_dir)
+        async with self.yt_client:
+            wb_dir = await self.yt_client.get_node_attributes(wb_id)
+        return self.serializer.deserialize_workbook(wb_dir)
 
-    async def create_workbook(self, title: str, collection_id: str, description: str = "") -> str:
-        parent_id = collection_id or self.root_collection_node_id
-        new_node_path = f"#{parent_id}/{title}"
-        async with self.yt:
-            async with self.yt.transaction():
-                node_id = await self.yt.create_dir(new_node_path)
-                await self.yt.set_attribute(node_id, const.YT_ATTR_DL_TYPE, const.DL_WORKBOOK_TYPE)
+    async def create_workbook(self, workbook: Workbook) -> str:
+        parent_id = workbook.collection_id or self.root_collection_node_id
+        new_node_path = f"#{parent_id}/{workbook.title}"
+        serialized = self.serializer.serialize_workbook(workbook)
+        async with self.yt_client:
+            async with self.yt_client.transaction():
+                node_id = await self.yt_client.create_dir(new_node_path)
+                for attr_key, attr_value in serialized.attributes.items():
+                    await self.yt_client.set_attribute(node_id, attr_key, attr_value)
 
         return node_id
 
     async def get_workbook_entries(self, wb_id: str) -> list[Entry]:
-        async with self.yt:
-            dir_objects = await self.yt.list_dir(wb_id, attributes=const.YT_ATTRS_TO_REQ)
+        async with self.yt_client:
+            dir_objects = await self.yt_client.list_dir(wb_id, attributes=const.YT_ATTRS_TO_REQ)
 
-        return [deserialize_entry(item, attributes=item[const.YT_LIST_ATTRS_KEY]) for item in dir_objects]
+        return [
+            self.serializer.deserialize_entry(item, attributes=item[const.YT_LIST_ATTRS_KEY])
+            for item in dir_objects
+        ]
 
     async def get_entry(self, entry_id: str) -> Entry:
-        async with self.yt:
-            raw_data = await self.yt.read_document(entry_id)
-            attributes = await self.yt.get_node_attributes(entry_id)
+        async with self.yt_client:
+            raw_data = await self.yt_client.read_document(entry_id)
+            attributes = await self.yt_client.get_node_attributes(entry_id)
 
-        return deserialize_entry(raw_data, attributes=attributes)
+        return self.serializer.deserialize_entry(raw_data, attributes=attributes)
 
-    async def create_entry(
-            self, name: str, workbook_id: str, entry_data: dict, unversioned_data: dict,
-            scope: str, entry_type: str
-    ) -> str:
-        parent_id = workbook_id or self.root_collection_node_id
-        new_node_path = f"#{parent_id}/{name}"
-        async with self.yt:
-            async with self.yt.transaction():
-                entry_id = await self.yt.create_document(
+    async def create_entry(self, entry: Entry) -> str:
+        new_node_path = f"#{entry.workbook_id}/{entry.key}"
+        serialized = self.serializer.serialize_entry(entry)
+        async with self.yt_client:
+            async with self.yt_client.transaction():
+                node_id = await self.yt_client.create_document(
                     node_path=new_node_path,
-                    data={"data": entry_data, "unversioned_data": unversioned_data}
+                    data=serialized.data,
                 )
-                await self.yt.set_attribute(entry_id, const.YT_ATTR_DL_TYPE, const.DL_ENTRY_TYPE)
-                await self.yt.set_attribute(entry_id, const.YT_ATTR_DL_ENTRY_SCOPE, scope)
-                await self.yt.set_attribute(entry_id, const.YT_ATTR_DL_ENTRY_TYPE, entry_type)
+                for attr_key, attr_value in serialized.attributes.items():
+                    await self.yt_client.set_attribute(node_id, attr_key, attr_value)
 
-        return entry_id
+        return node_id
 
     async def update_entry(self, entry_id: str, entry_data: dict | None, unversioned_data: dict | None):
-        async with self.yt:
-            async with self.yt.transaction():
-                raw_data = await self.yt.read_document(entry_id)
-                attributes = await self.yt.get_node_attributes(entry_id)
-                curr_entry = deserialize_entry(raw_data, attributes=attributes)
+        async with self.yt_client:
+            async with self.yt_client.transaction():
+                raw_data = await self.yt_client.read_document(entry_id)
+                attributes = await self.yt_client.get_node_attributes(entry_id)
+                curr_entry = self.serializer.deserialize_entry(raw_data, attributes=attributes)
 
-                new_data = entry_data if entry_data is not None else curr_entry.data
-                new_unversioned_data = unversioned_data if unversioned_data is not None else curr_entry.unversioned_data
-                await self.yt.write_document(
+                curr_entry.data = entry_data if entry_data is not None else curr_entry.data
+                curr_entry.unversioned_data = (
+                    unversioned_data
+                    if unversioned_data is not None
+                    else curr_entry.unversioned_data
+                )
+
+                serialized = self.serializer.serialize_entry(curr_entry)
+                await self.yt_client.write_document(
                     node_id=entry_id,
-                    data={"data": new_data, "unversioned_data": new_unversioned_data}
+                    data=serialized.data,
                 )

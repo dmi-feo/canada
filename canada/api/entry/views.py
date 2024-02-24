@@ -20,7 +20,7 @@ async def get_entry(request, app_services: AppServices):
     entry_id = request.match_info["entry_id"]
     entry = await app_services.wbman.get_entry(entry_id)
 
-    return entry
+    return app_services.api_serializer.serialize_entry(entry)
 
 
 @router.post("/v1/entries")
@@ -28,16 +28,10 @@ async def get_entry(request, app_services: AppServices):
 @request_schema(schema.CreateEntryRequest)
 @response_schema(schema.CreateEntryResponse)
 async def create_entry(request, verified_json: dict, app_services: AppServices):
-    entry_id = await app_services.wbman.create_entry(
-        name=verified_json["name"],
-        workbook_id=verified_json["workbook_id"],
-        entry_data=verified_json["data"],
-        unversioned_data=verified_json["unversioned_data"],
-        scope=verified_json["scope"],
-        entry_type=verified_json["type"],
-    )
+    entry = app_services.api_serializer.deserialize_entry(verified_json)
+    entry_id = await app_services.wbman.create_entry(entry)
 
-    return {"entry_id": entry_id}
+    return {"entryId": entry_id}
 
 
 @router.post("/v1/entries/{entry_id}")
@@ -47,11 +41,11 @@ async def update_entry(request, verified_json: dict, app_services: AppServices):
     entry_id = request.match_info["entry_id"]
     await app_services.wbman.update_entry(
         entry_id=entry_id,
-        entry_data=verified_json["data"],
-        unversioned_data=verified_json["unversioned_data"],
+        entry_data=verified_json.get("data"),
+        unversioned_data=verified_json.get("unversionedData"),
     )
 
-    return {"entry_id": entry_id}
+    return {"entryId": entry_id}
 
 
 @router.get("/v1/entries/{entry_id}/meta")
