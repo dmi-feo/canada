@@ -40,3 +40,9 @@ YT_HEADER_CSRF_NAME = "X-Csrf-Token"
 class YTNodeType(enum.Enum):
     map_node = "map_node"
     document = "document"
+
+
+class YTAuthMode(enum.Enum):
+    disabled = "disabled"
+    pass_request_creds = "pass_request_creds"
+    cookie_from_env = "from_env"
