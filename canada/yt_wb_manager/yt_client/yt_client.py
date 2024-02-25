@@ -1,12 +1,12 @@
 import ssl
 from contextlib import asynccontextmanager
+from typing import Any
 
 import aiohttp
 import attr
 
 from canada.yt_wb_manager.yt_client.auth import BaseYTAuthContext
-from canada.yt_wb_manager.yt_client.exc import TxAlreadyStarted
-from canada.yt_wb_manager import constants as yt_const
+from canada.yt_wb_manager.constants import YTNodeType, YTLockMode
 
 
 @attr.s(slots=True)
@@ -79,13 +79,24 @@ class SimpleYtClient:
             "POST", "abort_tx", params={"transaction_id": tx_id}
         )
 
-    async def create_file(self, file_path: str, ignore_existing: bool = True, tx_id: str | None = None) -> str:
+    async def create_node(
+            self, path: str, node_type: YTNodeType, ignore_existing: bool = True,
+            attributes: dict[str, Any] | None = None,
+            tx_id: str | None = None
+    ):
+        attributes = attributes or {}
         resp = await self.make_request(
             "POST", "create",
-            params={"path": file_path, "type": "file", "ignore_existing": int(ignore_existing), "transaction_id": tx_id}
+            params={
+                "path": path,
+                "type": node_type.value,
+                "ignore_existing": int(ignore_existing),
+                "transaction_id": tx_id,
+            },
+            json_data={"attributes": attributes}
         )
-        data = await resp.json()
-        return data  # string with id
+        node_id = await resp.json()
+        return node_id
 
     async def write_file(self, node_id: str, file_data: dict, tx_id: str | None = None):
         await self.make_request(
@@ -99,22 +110,6 @@ class SimpleYtClient:
             params={"path": f"#{node_id}", "transaction_id": tx_id}
         )
         return await resp.text()
-
-    async def create_document(
-            self, node_path: str, data: dict, ignore_existing: bool = True, tx_id: str | None = None
-    ) -> str:
-        resp = await self.make_request(
-            "POST", "create",
-            params={
-                "path": node_path,
-                "type": "document",
-                "ignore_existing": int(ignore_existing),
-                "transaction_id": tx_id,
-            },
-            json_data={"attributes": {"value": data}}
-        )
-        data = await resp.json()
-        return data  # string with id
 
     async def write_document(self, node_id: str, data: dict, tx_id: str | None = None):
         await self.make_request(
@@ -145,19 +140,6 @@ class SimpleYtClient:
         data = await resp.json()
         return data
 
-    async def create_dir(self, dir_path: str, tx_id: str | None = None) -> str:
-        resp = await self.make_request(
-            "POST", "create",
-            params={
-                "path": dir_path,
-                "type": "map_node",
-                "ignore_existing": 0,
-                "transaction_id": tx_id,
-            }
-        )
-        data = await resp.json()
-        return data  # string with id
-
     async def set_attribute(self, node_id: str, attr_name: str, attr_value: str, tx_id: str | None = None):
         await self.make_request(
             "PUT", "set",
@@ -177,7 +159,7 @@ class SimpleYtClient:
         )
 
     async def set_lock(
-            self, node_id: str, tx_id: str, mode: yt_const.YTLockMode, waitable: bool = False
+            self, node_id: str, tx_id: str, mode: YTLockMode, waitable: bool = False
     ) -> str:
         await self.make_request(
             "POST", "lock",

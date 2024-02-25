@@ -65,7 +65,10 @@ class YTWorkbookManager(BaseWorkbookManager):
         serialized = self.serializer.serialize_collection(collection)
         async with self.yt_client:
             async with self.yt_client.transaction() as tx_id:
-                node_id = await self.yt_client.create_dir(new_node_path, tx_id=tx_id)
+                node_id = await self.yt_client.create_node(
+                    new_node_path, node_type=yt_const.YTNodeType.map_node,
+                    tx_id=tx_id
+                )
                 for attr_key, attr_value in serialized.attributes.items():
                     await self.yt_client.set_attribute(node_id, attr_key, attr_value, tx_id=tx_id)
 
@@ -86,7 +89,10 @@ class YTWorkbookManager(BaseWorkbookManager):
         serialized = self.serializer.serialize_workbook(workbook)
         async with self.yt_client:
             async with self.yt_client.transaction() as tx_id:
-                node_id = await self.yt_client.create_dir(new_node_path, tx_id=tx_id)
+                node_id = await self.yt_client.create_node(
+                    new_node_path, node_type=yt_const.YTNodeType.map_node,
+                    tx_id=tx_id
+                )
                 for attr_key, attr_value in serialized.attributes.items():
                     await self.yt_client.set_attribute(node_id, attr_key, attr_value, tx_id=tx_id)
 
@@ -113,9 +119,10 @@ class YTWorkbookManager(BaseWorkbookManager):
         serialized = self.serializer.serialize_entry(entry)
         async with self.yt_client:
             async with self.yt_client.transaction() as tx_id:
-                node_id = await self.yt_client.create_document(
-                    node_path=new_node_path,
-                    data=serialized.data,
+                node_id = await self.yt_client.create_node(
+                    path=new_node_path,
+                    node_type=yt_const.YTNodeType.document,
+                    attributes={"value": serialized.data},
                     tx_id=tx_id,
                 )
                 for attr_key, attr_value in serialized.attributes.items():
