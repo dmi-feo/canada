@@ -42,6 +42,7 @@ class CollectionSchema(BaseUSContainerSchema):
 
 class WorkbookSchema(BaseUSContainerSchema):
     workbookId = ma.fields.String()
+    collectionId = ma.fields.String()
     permissions = ma.fields.Nested(BasePermissionsSchema())
 
 
