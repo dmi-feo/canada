@@ -2,8 +2,8 @@ import pytest
 
 from canada.app import create_app
 from canada.settings import CanadaSettings
-from canada.yt_client import SimpleYtClient
-from canada.wb_manager.wb_manager import WBManager
+from canada.wb_manager.yt_client import SimpleYtClient
+from canada.wb_manager.wb_manager import YTWorkbookManager
 
 
 @pytest.fixture(scope="function")
@@ -24,4 +24,4 @@ def yt_client(app_settings):
 
 @pytest.fixture(scope="function")
 def wb_manager(yt_client, app_settings):
-    return WBManager(yt_cli=yt_client, root_collection_node_id=app_settings.ROOT_COLLECTION_NODE_ID)
+    return YTWorkbookManager(yt_cli=yt_client, root_collection_node_id=app_settings.ROOT_COLLECTION_NODE_ID)

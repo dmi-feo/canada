@@ -11,8 +11,10 @@ import canada.api.workbook.views
 import canada.api.entry.views
 from canada import constants
 
-from canada.yt_client import SimpleYtClient, YTCookieAuthContext, YTNoAuthContext
+from canada.wb_manager.yt_client import SimpleYtClient, YTCookieAuthContext, YTNoAuthContext
 from canada.settings import CanadaSettings, YTAuthMode
+from canada.wb_manager.wb_manager import YTWorkbookManager
+from canada.wb_manager.serialization import SimpleCanadaStorageSerializer
 
 
 def get_yt_cli_noauth_factory(settings: CanadaSettings):
@@ -45,6 +47,19 @@ def get_yt_cli_request_cookie_auth_factory(settings: CanadaSettings):
     return yt_cli_factory
 
 
+def get_workbook_manager_factory(
+        yt_cli_factory: Callable[[web.Request], SimpleYtClient],
+        root_collection_node_id: str,
+) -> Callable[[web.Request], YTWorkbookManager]:
+    def workbook_manager_factory(request: web.Request) -> YTWorkbookManager:
+        return YTWorkbookManager(
+            yt_client=yt_cli_factory(request),
+            root_collection_node_id=root_collection_node_id,
+            serializer=SimpleCanadaStorageSerializer(),
+        )
+    return workbook_manager_factory
+
+
 def create_app(settings: CanadaSettings) -> web.Application:
     logging.basicConfig(level=logging.DEBUG)
 
@@ -62,8 +77,10 @@ def create_app(settings: CanadaSettings) -> web.Application:
     app_instance = web.Application(
         middlewares=[
             attach_services(
-                yt_cli_factory=yt_cli_factory,
-                root_collection_node_id=settings.ROOT_COLLECTION_NODE_ID,
+                workbook_manager_factory=get_workbook_manager_factory(
+                    yt_cli_factory=yt_cli_factory,
+                    root_collection_node_id=settings.ROOT_COLLECTION_NODE_ID,
+                )
             ),
         ]
     )

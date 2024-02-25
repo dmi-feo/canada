@@ -1,6 +1,6 @@
 import marshmallow as ma
 
-from canada.base_schema import EntrySchema
+from canada.api.base_schema import EntrySchema
 
 
 class GetEntryResponse(EntrySchema):

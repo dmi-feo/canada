@@ -5,19 +5,17 @@ from typing import TYPE_CHECKING
 import attr
 
 from canada.wb_manager.exc import RootCollectionCannotBeRequested
-from canada.yt_client import SimpleYtClient
-from canada.models import (
-    CollectionContent, Workbook, Collection,
-    Entry
-)
+from canada.wb_manager.yt_client import SimpleYtClient
+from canada.models import CollectionContent, Workbook, Collection, Entry
 from canada import constants as const
+from canada.base_wb_manager import BaseWorkbookManager
 
 if TYPE_CHECKING:
     from canada.wb_manager.serialization import BaseCanadaStorageSerializer
 
 
 @attr.s
-class WBManager:
+class YTWorkbookManager(BaseWorkbookManager):
     yt_client: SimpleYtClient = attr.ib()
     root_collection_node_id: str = attr.ib()
     serializer: BaseCanadaStorageSerializer = attr.ib()
@@ -64,9 +62,9 @@ class WBManager:
 
         return node_id
 
-    async def delete_collection(self, collection_id: str):
+    async def delete_collection(self, coll_id: str):
         async with self.yt_client:
-            await self.yt_client.delete_node(collection_id)
+            await self.yt_client.delete_node(coll_id)
 
     async def get_workbook(self, wb_id: str) -> Workbook:
         async with self.yt_client:

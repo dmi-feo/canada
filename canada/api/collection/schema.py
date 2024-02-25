@@ -1,6 +1,6 @@
 import marshmallow as ma
 
-from canada import base_schema, base_schema as bsch
+from canada.api import base_schema
 from canada.contrib.ma_top_level import TopLevelSchema
 
 
@@ -22,9 +22,9 @@ class CollectionBreadcrumbsResponse(TopLevelSchema):
 
 
 class CollectionContentResponseSchema(ma.Schema):
-    collections = ma.fields.Nested(bsch.CollectionSchema(), many=True)
+    collections = ma.fields.Nested(base_schema.CollectionSchema(), many=True)
     collectionsNextPageToken = ma.fields.String()
-    workbooks = ma.fields.Nested(bsch.WorkbookSchema(), many=True)
+    workbooks = ma.fields.Nested(base_schema.WorkbookSchema(), many=True)
     workbooksNextPageToken = ma.fields.String()
 
 
