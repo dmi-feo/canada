@@ -1,5 +1,4 @@
 import enum
-from enum import Enum
 
 
 YT_ATTR_DL_TYPE = "dl_type"

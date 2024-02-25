@@ -11,7 +11,8 @@ import canada.api.workbook.views
 import canada.api.entry.views
 from canada import constants
 
-from canada.wb_manager.yt_client import SimpleYtClient, YTCookieAuthContext, YTNoAuthContext
+from canada.wb_manager.yt_client.yt_client import SimpleYtClient
+from canada.wb_manager.yt_client.auth import YTCookieAuthContext, YTNoAuthContext
 from canada.settings import CanadaSettings, YTAuthMode
 from canada.wb_manager.wb_manager import YTWorkbookManager
 from canada.wb_manager.serialization import SimpleCanadaStorageSerializer

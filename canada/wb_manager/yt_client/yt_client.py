@@ -1,40 +1,17 @@
-import abc
 import ssl
 from contextlib import asynccontextmanager
 
 import aiohttp
 import attr
 
-from canada import constants
-
-
-class TxAlreadyStarted(Exception):
-    pass
-
-
-class YTAuthContext(abc.ABC):
-    def add_auth(self, cookies: dict[str, str], headers: dict[str, str]):
-        pass
-
-
-class YTNoAuthContext(YTAuthContext):
-    pass
-
-
-@attr.s(slots=True)
-class YTCookieAuthContext(YTAuthContext):
-    cypress_cookie: str = attr.ib(repr=False)
-    csrf_token: str = attr.ib(repr=False)
-
-    def add_auth(self, cookies: dict[str, str], headers: dict[str, str]):
-        cookies[constants.YT_COOKIE_TOKEN_NAME] = self.cypress_cookie
-        headers[constants.YT_HEADER_CSRF_NAME] = self.csrf_token
+from canada.wb_manager.yt_client.auth import BaseYTAuthContext
+from canada.wb_manager.yt_client.exc import TxAlreadyStarted
 
 
 @attr.s(slots=True)
 class SimpleYtClient:
     yt_host: str = attr.ib()
-    auth_context: YTAuthContext = attr.ib()
+    auth_context: BaseYTAuthContext = attr.ib()
     ca_file: str = attr.ib(default=None)
     _curr_tx_id: str | None = attr.ib(default=None)
     _session: aiohttp.ClientSession | None = attr.ib(default=None)
@@ -64,7 +41,7 @@ class SimpleYtClient:
 
         cookies = cookies or {}
 
-        self.auth_context.add_auth(cookies=cookies, headers=headers)  # TODO FIXME: it's ugly
+        self.auth_context.mutate_auth_data(cookies=cookies, headers=headers)  # TODO FIXME: it's ugly
 
         resp = await self._session.request(
             method=method, url=f"{self.yt_host}/api/v3/{url}",

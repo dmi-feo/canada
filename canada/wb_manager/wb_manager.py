@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import attr
 
 from canada.wb_manager.exc import RootCollectionCannotBeRequested
-from canada.wb_manager.yt_client import SimpleYtClient
+from canada.wb_manager.yt_client.yt_client import SimpleYtClient
 from canada.models import CollectionContent, Workbook, Collection, Entry
 from canada import constants as const
 from canada.base_wb_manager import BaseWorkbookManager
