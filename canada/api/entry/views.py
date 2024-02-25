@@ -43,6 +43,7 @@ async def update_entry(request, verified_json: dict, app_services: AppServices):
         entry_id=entry_id,
         entry_data=verified_json.get("data"),
         unversioned_data=verified_json.get("unversionedData"),
+        lock_token=verified_json.get("lockToken"),
     )
 
     return {"entryId": entry_id}

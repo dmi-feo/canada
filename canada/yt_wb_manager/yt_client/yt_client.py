@@ -6,6 +6,7 @@ import attr
 
 from canada.yt_wb_manager.yt_client.auth import BaseYTAuthContext
 from canada.yt_wb_manager.yt_client.exc import TxAlreadyStarted
+from canada.yt_wb_manager import constants as yt_const
 
 
 @attr.s(slots=True)
@@ -13,7 +14,6 @@ class SimpleYtClient:
     yt_host: str = attr.ib()
     auth_context: BaseYTAuthContext = attr.ib()
     ca_file: str = attr.ib(default=None)
-    _curr_tx_id: str | None = attr.ib(default=None)
     _session: aiohttp.ClientSession | None = attr.ib(default=None)
 
     async def __aenter__(self):
@@ -36,12 +36,12 @@ class SimpleYtClient:
         })
 
         params = params or {}
-        if self._curr_tx_id is not None:
-            params["transaction_id"] = self._curr_tx_id
-
         cookies = cookies or {}
 
         self.auth_context.mutate_auth_data(cookies=cookies, headers=headers)  # TODO FIXME: it's ugly
+
+        if "transaction_id" in params and params["transaction_id"] is None:
+            del params["transaction_id"]
 
         resp = await self._session.request(
             method=method, url=f"{self.yt_host}/api/v3/{url}",
@@ -52,94 +52,143 @@ class SimpleYtClient:
         return resp
 
     @asynccontextmanager
-    async def transaction(self):
-        if self._curr_tx_id is not None:
-            raise TxAlreadyStarted()
-        self._curr_tx_id = await self.start_transaction()
+    async def transaction(self, outer_tx_id: str | None = None):  # TODO: ensure all operations in tx send tx_id
+        tx_id = await self.start_transaction(outer_tx_id=outer_tx_id)
         try:
-            yield
+            yield tx_id
         except Exception:
-            await self.abort_transaction(self._curr_tx_id)
+            await self.abort_transaction(tx_id)
             raise
         else:
-            await self.commit_transaction(self._curr_tx_id)
-        finally:
-            self._curr_tx_id = None
+            await self.commit_transaction(tx_id)
 
-    async def start_transaction(self) -> str:
+    async def start_transaction(self, outer_tx_id: str | None = None) -> str:
         resp = await self.make_request(
-            "POST", "start_tx"
+            "POST", "start_tx",
+            params={"transaction_id": outer_tx_id}
         )
         return await resp.json()
 
-    async def commit_transaction(self, transaction_id: str):
+    async def commit_transaction(self, tx_id: str):
         await self.make_request(
-            "POST", "commit_tx", params={"transaction_id": transaction_id}
+            "POST", "commit_tx", params={"transaction_id": tx_id}
         )
 
-    async def abort_transaction(self, transaction_id: str):
+    async def abort_transaction(self, tx_id: str):
         await self.make_request(
-            "POST", "abort_tx", params={"transaction_id": transaction_id}
+            "POST", "abort_tx", params={"transaction_id": tx_id}
         )
 
-    async def create_file(self, file_path: str, ignore_existing: bool = True) -> str:
+    async def create_file(self, file_path: str, ignore_existing: bool = True, tx_id: str | None = None) -> str:
         resp = await self.make_request(
             "POST", "create",
-            params={"path": file_path, "type": "file", "ignore_existing": int(ignore_existing)}
+            params={"path": file_path, "type": "file", "ignore_existing": int(ignore_existing), "transaction_id": tx_id}
         )
         data = await resp.json()
         return data  # string with id
 
-    async def write_file(self, node_id: str, file_data: dict):
-        await self.make_request("PUT", "write_file", params={"path": f"#{node_id}"}, json_data=file_data)
+    async def write_file(self, node_id: str, file_data: dict, tx_id: str | None = None):
+        await self.make_request(
+            "PUT", "write_file",
+            params={"path": f"#{node_id}", "transaction_id": tx_id}, json_data=file_data
+        )
 
-    async def read_file(self, node_id: str):
-        resp = await self.make_request("GET", "read_file", params={"path": f"#{node_id}"})
+    async def read_file(self, node_id: str, tx_id: str | None = None):
+        resp = await self.make_request(
+            "GET", "read_file",
+            params={"path": f"#{node_id}", "transaction_id": tx_id}
+        )
         return await resp.text()
 
-    async def create_document(self, node_path: str, data: dict, ignore_existing: bool = True) -> str:
+    async def create_document(
+            self, node_path: str, data: dict, ignore_existing: bool = True, tx_id: str | None = None
+    ) -> str:
         resp = await self.make_request(
             "POST", "create",
-            params={"path": node_path, "type": "document", "ignore_existing": int(ignore_existing)},
+            params={
+                "path": node_path,
+                "type": "document",
+                "ignore_existing": int(ignore_existing),
+                "transaction_id": tx_id,
+            },
             json_data={"attributes": {"value": data}}
         )
         data = await resp.json()
         return data  # string with id
 
-    async def write_document(self, node_id: str, data: dict):
-        await self.make_request("PUT", "set", params={"path": f"#{node_id}"}, json_data=data)
+    async def write_document(self, node_id: str, data: dict, tx_id: str | None = None):
+        await self.make_request(
+            "PUT", "set",
+            params={"path": f"#{node_id}", "transaction_id": tx_id}, json_data=data
+        )
 
-    async def read_document(self, node_id: str):
-        resp = await self.make_request("GET", "get", params={"path": f"#{node_id}"})
-        return await resp.json()
-
-    async def get_node_attributes(self, node_id: str):
-        resp = await self.make_request("GET", "get", params={"path": f"#{node_id}/@"})
-        return await resp.json()
-
-    async def list_dir(self, node_id: str, attributes: list[str]):
+    async def read_document(self, node_id: str, tx_id: str | None = None):
         resp = await self.make_request(
-            "POST", "list", json_data={"path": f"#{node_id}", "attributes": attributes},
+            "GET", "get",
+            params={"path": f"#{node_id}", "transaction_id": tx_id}
+        )
+        return await resp.json()
+
+    async def get_node_attributes(self, node_id: str, tx_id: str | None = None):
+        resp = await self.make_request(
+            "GET", "get",
+            params={"path": f"#{node_id}/@", "transaction_id": tx_id}
+        )
+        return await resp.json()
+
+    async def list_dir(self, node_id: str, attributes: list[str], tx_id: str | None = None):
+        resp = await self.make_request(
+            "POST", "list",
+            json_data={"path": f"#{node_id}", "attributes": attributes},
+            params={"transaction_id": tx_id}
         )
         data = await resp.json()
         return data
 
-    async def create_dir(self, dir_path: str) -> str:
+    async def create_dir(self, dir_path: str, tx_id: str | None = None) -> str:
         resp = await self.make_request(
             "POST", "create",
-            params={"path": dir_path, "type": "map_node", "ignore_existing": 0}
+            params={
+                "path": dir_path,
+                "type": "map_node",
+                "ignore_existing": 0,
+                "transaction_id": tx_id,
+            }
         )
         data = await resp.json()
         return data  # string with id
 
-    async def set_attribute(self, node_id: str, attr_name: str, attr_value: str):
+    async def set_attribute(self, node_id: str, attr_name: str, attr_value: str, tx_id: str | None = None):
         await self.make_request(
             "PUT", "set",
-            params={"path": f"#{node_id}/@{attr_name}", "encode_utf8": 0}, json_data=attr_value,
+            params={
+                "path": f"#{node_id}/@{attr_name}",
+                "encode_utf8": 0,
+                "transaction_id": tx_id,
+            },
+            json_data=attr_value,
         )
 
-    async def delete_node(self, node_id: str):
+    async def delete_node(self, node_id: str, tx_id: str | None = None):
         await self.make_request(
             "POST", "remove",
-            json_data={"path": f"#{node_id}"}
+            json_data={"path": f"#{node_id}"},
+            params={"transaction_id": tx_id}
+        )
+
+    async def set_lock(
+            self, node_id: str, tx_id: str, mode: yt_const.YTLockMode, waitable: bool = False
+    ) -> str:
+        await self.make_request(
+            "POST", "lock",
+            json_data={"path": f"#{node_id}", "mode": mode.value, "waitable": waitable},
+            params={"transaction_id": tx_id},
+        )
+        return tx_id
+
+    async def delete_lock(self, node_id: str, tx_id: str):
+        await self.make_request(
+            "POST", "unlock",
+            json_data={"path": f"#{node_id}"},
+            params={"transaction_id": tx_id},
         )

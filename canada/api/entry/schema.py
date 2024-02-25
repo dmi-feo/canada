@@ -33,6 +33,8 @@ class UpdateEntryRequest(ma.Schema):
     mode = ma.fields.String()
     meta = ma.fields.Dict()
     links = ma.fields.Dict()
+    lockToken = ma.fields.String(allow_none=True)
+    hidden = ma.fields.Bool(allow_none=True)  # control-api sends it when entry is being updated with lock
 
 
 class UpdateEntryResponse(ma.Schema):

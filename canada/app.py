@@ -9,6 +9,7 @@ from canada.app_stuff import attach_services
 import canada.api.collection.views
 import canada.api.workbook.views
 import canada.api.entry.views
+import canada.api.lock.views
 from canada import constants
 
 from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
@@ -100,6 +101,7 @@ def configure_routes(app_instance: web.Application):
     app_instance.add_routes(canada.api.entry.views.router)
     app_instance.add_routes(canada.api.workbook.views.router)
     app_instance.add_routes(canada.api.collection.views.router)
+    app_instance.add_routes(canada.api.lock.views.router)
 
 
 if __name__ == "__main__":

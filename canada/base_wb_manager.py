@@ -44,3 +44,11 @@ class BaseWorkbookManager(abc.ABC):
     async def update_entry(self, entry_id: str, entry_data: dict | None, unversioned_data: dict | None):
         # TODO: introduce EntryUpdate object
         pass
+
+    @abc.abstractmethod
+    async def set_lock(self, entry_id: str, duration: int | None = None, force: bool | None = None) -> str:
+        pass
+
+    @abc.abstractmethod
+    async def delete_lock(self, entry_id: str, lock_id: str):
+        pass

@@ -64,10 +64,10 @@ class YTWorkbookManager(BaseWorkbookManager):
         new_node_path = f"#{parent_id}/{collection.title}"
         serialized = self.serializer.serialize_collection(collection)
         async with self.yt_client:
-            async with self.yt_client.transaction():
-                node_id = await self.yt_client.create_dir(new_node_path)
+            async with self.yt_client.transaction() as tx_id:
+                node_id = await self.yt_client.create_dir(new_node_path, tx_id=tx_id)
                 for attr_key, attr_value in serialized.attributes.items():
-                    await self.yt_client.set_attribute(node_id, attr_key, attr_value)
+                    await self.yt_client.set_attribute(node_id, attr_key, attr_value, tx_id=tx_id)
 
         return node_id
 
@@ -85,10 +85,10 @@ class YTWorkbookManager(BaseWorkbookManager):
         new_node_path = f"#{parent_id}/{workbook.title}"
         serialized = self.serializer.serialize_workbook(workbook)
         async with self.yt_client:
-            async with self.yt_client.transaction():
-                node_id = await self.yt_client.create_dir(new_node_path)
+            async with self.yt_client.transaction() as tx_id:
+                node_id = await self.yt_client.create_dir(new_node_path, tx_id=tx_id)
                 for attr_key, attr_value in serialized.attributes.items():
-                    await self.yt_client.set_attribute(node_id, attr_key, attr_value)
+                    await self.yt_client.set_attribute(node_id, attr_key, attr_value, tx_id=tx_id)
 
         return node_id
 
@@ -112,21 +112,26 @@ class YTWorkbookManager(BaseWorkbookManager):
         new_node_path = f"#{entry.workbook_id}/{entry.title}"
         serialized = self.serializer.serialize_entry(entry)
         async with self.yt_client:
-            async with self.yt_client.transaction():
+            async with self.yt_client.transaction() as tx_id:
                 node_id = await self.yt_client.create_document(
                     node_path=new_node_path,
                     data=serialized.data,
+                    tx_id=tx_id,
                 )
                 for attr_key, attr_value in serialized.attributes.items():
-                    await self.yt_client.set_attribute(node_id, attr_key, attr_value)
+                    await self.yt_client.set_attribute(node_id, attr_key, attr_value, tx_id=tx_id)
 
         return node_id
 
-    async def update_entry(self, entry_id: str, entry_data: dict | None, unversioned_data: dict | None):
+    async def update_entry(
+            self, entry_id: str, entry_data: dict | None, unversioned_data: dict | None,
+            lock_token: str | None = None,
+    ):
+        running_tx_id = lock_token
         async with self.yt_client:
-            async with self.yt_client.transaction():
-                raw_data = await self.yt_client.read_document(entry_id)
-                attributes = await self.yt_client.get_node_attributes(entry_id)
+            async with self.yt_client.transaction(outer_tx_id=running_tx_id) as tx_id:
+                raw_data = await self.yt_client.read_document(entry_id, tx_id=tx_id)
+                attributes = await self.yt_client.get_node_attributes(entry_id, tx_id=tx_id)
                 curr_entry = self.serializer.deserialize_entry(raw_data, attributes=attributes)
 
                 curr_entry.data = entry_data if entry_data is not None else curr_entry.data
@@ -140,4 +145,16 @@ class YTWorkbookManager(BaseWorkbookManager):
                 await self.yt_client.write_document(
                     node_id=entry_id,
                     data=serialized.data,
+                    tx_id=tx_id
                 )
+
+    async def set_lock(self, entry_id: str, duration: int | None = None, force: bool | None = None) -> str:
+        async with self.yt_client:
+            tx_id = await self.yt_client.start_transaction()
+            await self.yt_client.set_lock(entry_id, tx_id=tx_id, mode=yt_const.YTLockMode.exclusive)
+        return tx_id  # we have to finish the transaction on lock release, and we don't care about lock_token at all
+
+    async def delete_lock(self, entry_id: str, lock_token: str):
+        tx_id = lock_token  # that's how it is
+        async with self.yt_client:
+            await self.yt_client.commit_transaction(tx_id)
