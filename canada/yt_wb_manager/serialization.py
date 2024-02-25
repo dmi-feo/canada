@@ -5,14 +5,15 @@ from typing import ClassVar
 
 import attr
 
-from canada import constants
+from canada.constants import CanadaEntityType
+from canada.yt_wb_manager import constants as yt_const
 from canada.models import Workbook, Collection, Entry, ModificationInfo
 
 
 @attr.s
 class SerializableEntity:
     title: str = attr.ib()
-    node_type: constants.YTNodeType = attr.ib()
+    node_type: yt_const.YTNodeType = attr.ib()
     data: dict | None = attr.ib()
     attributes: dict[str, str] | None = attr.ib()
 
@@ -50,63 +51,63 @@ class SimpleCanadaStorageSerializer(BaseCanadaStorageSerializer):
     def serialize_collection(self, collection: Collection) -> SerializableEntity:
         return SerializableEntity(
             title=collection.title,
-            node_type=constants.YTNodeType.map_node,
+            node_type=yt_const.YTNodeType.map_node,
             data=None,
             attributes={
-                constants.YT_ATTR_DL_TYPE: constants.DL_COLLECTION_TYPE,
+                yt_const.YTAttributes.DL_TYPE.value: CanadaEntityType.collection.value,
             },
         )
 
     def deserialize_collection(self, raw_data: dict) -> Collection:
-        collection_id = raw_data[constants.YT_ATTR_ID]
+        collection_id = raw_data[yt_const.YTAttributes.ID.value]
 
         return Collection(
             collection_id=collection_id,
-            parent_id=raw_data[constants.YT_ATTR_PARENT_ID],
-            title=raw_data[constants.YT_ATTR_KEY],
+            parent_id=raw_data[yt_const.YTAttributes.PARENT_ID.value],
+            title=raw_data[yt_const.YTAttributes.KEY.value],
             modification_info=ModificationInfo(
-                created_by=raw_data[constants.YT_ATTR_OWNER],
-                created_at=raw_data[constants.YT_ATTR_CREATION_TIME],
+                created_by=raw_data[yt_const.YTAttributes.OWNER.value],
+                created_at=raw_data[yt_const.YTAttributes.CREATION_TIME.value],
                 updated_by="unknown",
-                updated_at=raw_data[constants.YT_ATTR_MOD_TIME],
+                updated_at=raw_data[yt_const.YTAttributes.MOD_TIME.value],
             ),
         )
 
     def serialize_workbook(self, workbook: Workbook) -> SerializableEntity:
         return SerializableEntity(
             title=workbook.title,
-            node_type=constants.YTNodeType.map_node,
+            node_type=yt_const.YTNodeType.map_node,
             data=None,
             attributes={
-                constants.YT_ATTR_DL_TYPE: constants.DL_WORKBOOK_TYPE,
+                yt_const.YTAttributes.DL_TYPE.value: CanadaEntityType.workbook.value,
             },
         )
 
     def deserialize_workbook(self, raw_data: dict) -> Workbook:
         return Workbook(
-            workbook_id=raw_data[constants.YT_ATTR_ID],
-            collection_id=raw_data[constants.YT_ATTR_PARENT_ID],
-            title=raw_data[constants.YT_ATTR_KEY],
+            workbook_id=raw_data[yt_const.YTAttributes.ID.value],
+            collection_id=raw_data[yt_const.YTAttributes.PARENT_ID.value],
+            title=raw_data[yt_const.YTAttributes.KEY.value],
             modification_info=ModificationInfo(
-                created_by=raw_data[constants.YT_ATTR_OWNER],
-                created_at=raw_data[constants.YT_ATTR_CREATION_TIME],
+                created_by=raw_data[yt_const.YTAttributes.OWNER.value],
+                created_at=raw_data[yt_const.YTAttributes.CREATION_TIME.value],
                 updated_by="unknown",
-                updated_at=raw_data[constants.YT_ATTR_MOD_TIME],
+                updated_at=raw_data[yt_const.YTAttributes.MOD_TIME.value],
             ),
         )
 
     def serialize_entry(self, entry: Entry) -> SerializableEntity:
         return SerializableEntity(
             title=entry.title,
-            node_type=constants.YTNodeType.document,
+            node_type=yt_const.YTNodeType.document,
             data={
                 self.YT_DOCUMENT_DATA_KEY: entry.data,
                 self.YT_DOCUMENT_UNVERSIONED_DATA_KEY: entry.unversioned_data,
             },
             attributes={
-                constants.YT_ATTR_DL_TYPE: constants.DL_ENTRY_TYPE,
-                constants.YT_ATTR_DL_ENTRY_SCOPE: entry.scope,
-                constants.YT_ATTR_DL_ENTRY_TYPE: entry.entry_type,
+                yt_const.YTAttributes.DL_TYPE.value: CanadaEntityType.entry.value,
+                yt_const.YTAttributes.DL_ENTRY_SCOPE.value: entry.scope,
+                yt_const.YTAttributes.DL_ENTRY_TYPE.value: entry.entry_type,
             },
         )
 
@@ -114,16 +115,16 @@ class SimpleCanadaStorageSerializer(BaseCanadaStorageSerializer):
         return Entry(
             data=raw_data.get(self.YT_DOCUMENT_DATA_KEY, {}),
             unversioned_data=raw_data.get(self.YT_DOCUMENT_UNVERSIONED_DATA_KEY, {}),
-            entry_id=attributes[constants.YT_ATTR_ID],
-            workbook_id=attributes[constants.YT_ATTR_PARENT_ID],
-            title=attributes[constants.YT_ATTR_KEY],
-            scope=attributes[constants.YT_ATTR_DL_ENTRY_SCOPE],
-            entry_type=attributes[constants.YT_ATTR_DL_ENTRY_TYPE],
+            entry_id=attributes[yt_const.YTAttributes.ID.value],
+            workbook_id=attributes[yt_const.YTAttributes.PARENT_ID.value],
+            title=attributes[yt_const.YTAttributes.KEY.value],
+            scope=attributes[yt_const.YTAttributes.DL_ENTRY_SCOPE.value],
+            entry_type=attributes[yt_const.YTAttributes.DL_ENTRY_TYPE.value],
             meta={"state": "saved"},
             modification_info=ModificationInfo(
-                created_by=attributes[constants.YT_ATTR_OWNER],
-                created_at=attributes[constants.YT_ATTR_CREATION_TIME],
+                created_by=attributes[yt_const.YTAttributes.OWNER.value],
+                created_at=attributes[yt_const.YTAttributes.CREATION_TIME.value],
                 updated_by="unknown",
-                updated_at=attributes[constants.YT_ATTR_MOD_TIME],
+                updated_at=attributes[yt_const.YTAttributes.MOD_TIME.value],
             ),
         )

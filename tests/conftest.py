@@ -2,8 +2,8 @@ import pytest
 
 from canada.app import create_app
 from canada.settings import CanadaSettings
-from canada.wb_manager.yt_client import SimpleYtClient
-from canada.wb_manager.wb_manager import YTWorkbookManager
+from canada.yt_wb_manager.yt_client import SimpleYtClient
+from canada.yt_wb_manager.wb_manager import YTWorkbookManager
 
 
 @pytest.fixture(scope="function")

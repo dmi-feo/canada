@@ -5,7 +5,7 @@ from aiohttp import web
 
 import canada.api.collection.schema as sch
 from canada.aiohttp_marshmallow.base import response_schema, request_schema
-from canada.wb_manager.exc import RootCollectionCannotBeRequested
+from canada.yt_wb_manager.exc import RootCollectionCannotBeRequested
 
 if typing.TYPE_CHECKING:
     from canada.app_stuff import AppServices

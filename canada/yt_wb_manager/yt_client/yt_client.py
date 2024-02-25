@@ -4,8 +4,8 @@ from contextlib import asynccontextmanager
 import aiohttp
 import attr
 
-from canada.wb_manager.yt_client.auth import BaseYTAuthContext
-from canada.wb_manager.yt_client.exc import TxAlreadyStarted
+from canada.yt_wb_manager.yt_client.auth import BaseYTAuthContext
+from canada.yt_wb_manager.yt_client.exc import TxAlreadyStarted
 
 
 @attr.s(slots=True)

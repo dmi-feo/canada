@@ -4,14 +4,15 @@ from typing import TYPE_CHECKING
 
 import attr
 
-from canada.wb_manager.exc import RootCollectionCannotBeRequested
-from canada.wb_manager.yt_client.yt_client import SimpleYtClient
+from canada.constants import CanadaEntityType
+from canada.yt_wb_manager.exc import RootCollectionCannotBeRequested
+from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
 from canada.models import CollectionContent, Workbook, Collection, Entry
-from canada import constants as const
+from canada.yt_wb_manager import constants as yt_const
 from canada.base_wb_manager import BaseWorkbookManager
 
 if TYPE_CHECKING:
-    from canada.wb_manager.serialization import BaseCanadaStorageSerializer
+    from canada.yt_wb_manager.serialization import BaseCanadaStorageSerializer
 
 
 @attr.s
@@ -23,20 +24,28 @@ class YTWorkbookManager(BaseWorkbookManager):
     async def list_collection(self, coll_id: str | None = None) -> CollectionContent:
         coll_id = coll_id or self.root_collection_node_id
         async with self.yt_client:
-            dirs = await self.yt_client.list_dir(coll_id, attributes=const.YT_ATTRS_TO_REQ)
+            dirs = await self.yt_client.list_dir(coll_id, attributes=yt_const.YT_ATTRS_TO_REQ)
 
         workbooks = [
-            self.serializer.deserialize_workbook(item[const.YT_LIST_ATTRS_KEY])
+            self.serializer.deserialize_workbook(item[yt_const.YT_LIST_ATTRIBUTES_KEY])
             for item in dirs
-            if item[const.YT_LIST_ATTRS_KEY][const.YT_ATTR_DL_TYPE] == const.DL_WORKBOOK_TYPE
+            if (
+                    item[yt_const.YT_LIST_ATTRIBUTES_KEY][yt_const.YTAttributes.DL_TYPE.value] ==
+                    CanadaEntityType.workbook.value
+            )
         ]
 
         collections = [
-            self.serializer.deserialize_collection(item[const.YT_LIST_ATTRS_KEY])
+            self.serializer.deserialize_collection(item[yt_const.YT_LIST_ATTRIBUTES_KEY])
             for item in dirs
             if (
-                    item[const.YT_LIST_ATTRS_KEY][const.YT_ATTR_DL_TYPE] == const.DL_COLLECTION_TYPE and
-                    item[const.YT_LIST_ATTRS_KEY][const.YT_ATTR_ID] != self.root_collection_node_id
+                (
+                    item[yt_const.YT_LIST_ATTRIBUTES_KEY][yt_const.YTAttributes.DL_TYPE.value] ==
+                    CanadaEntityType.collection.value
+                ) and (
+                    item[yt_const.YT_LIST_ATTRIBUTES_KEY][yt_const.YTAttributes.ID.value] !=
+                    self.root_collection_node_id
+                )
             )
         ]
 
@@ -85,10 +94,10 @@ class YTWorkbookManager(BaseWorkbookManager):
 
     async def get_workbook_entries(self, wb_id: str) -> list[Entry]:
         async with self.yt_client:
-            dir_objects = await self.yt_client.list_dir(wb_id, attributes=const.YT_ATTRS_TO_REQ)
+            dir_objects = await self.yt_client.list_dir(wb_id, attributes=yt_const.YT_ATTRS_TO_REQ)
 
         return [
-            self.serializer.deserialize_entry(item, attributes=item[const.YT_LIST_ATTRS_KEY])
+            self.serializer.deserialize_entry(item, attributes=item[yt_const.YT_LIST_ATTRIBUTES_KEY])
             for item in dir_objects
         ]
 

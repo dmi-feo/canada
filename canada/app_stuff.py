@@ -9,7 +9,7 @@ from aiohttp.web import middleware
 from canada.api.serializer import SimpleCanadaApiSerializer
 
 if TYPE_CHECKING:
-    from canada.wb_manager.wb_manager import BaseWorkbookManager
+    from canada.yt_wb_manager.wb_manager import BaseWorkbookManager
     from canada.api.serializer import BaseCanadaApiSerializer
     from aiohttp.web import Request
 
