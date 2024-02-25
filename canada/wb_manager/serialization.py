@@ -97,7 +97,7 @@ class SimpleCanadaStorageSerializer(BaseCanadaStorageSerializer):
 
     def serialize_entry(self, entry: Entry) -> SerializableEntity:
         return SerializableEntity(
-            title=entry.key,
+            title=entry.title,
             node_type=constants.YTNodeType.document,
             data={
                 self.YT_DOCUMENT_DATA_KEY: entry.data,
@@ -116,7 +116,7 @@ class SimpleCanadaStorageSerializer(BaseCanadaStorageSerializer):
             unversioned_data=raw_data.get(self.YT_DOCUMENT_UNVERSIONED_DATA_KEY, {}),
             entry_id=attributes[constants.YT_ATTR_ID],
             workbook_id=attributes[constants.YT_ATTR_PARENT_ID],
-            key=attributes[constants.YT_ATTR_KEY],
+            title=attributes[constants.YT_ATTR_KEY],
             scope=attributes[constants.YT_ATTR_DL_ENTRY_SCOPE],
             entry_type=attributes[constants.YT_ATTR_DL_ENTRY_TYPE],
             meta={"state": "saved"},

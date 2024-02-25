@@ -37,7 +37,7 @@ class Entry:
     data: dict = attr.ib()
     unversioned_data: dict = attr.ib()
     workbook_id: str = attr.ib()
-    key: str = attr.ib()
+    title: str = attr.ib()
     scope: str = attr.ib()
     entry_type: str = attr.ib()
     meta: dict = attr.ib(factory=dict)

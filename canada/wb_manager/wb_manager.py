@@ -102,7 +102,7 @@ class WBManager:
         return self.serializer.deserialize_entry(raw_data, attributes=attributes)
 
     async def create_entry(self, entry: Entry) -> str:
-        new_node_path = f"#{entry.workbook_id}/{entry.key}"
+        new_node_path = f"#{entry.workbook_id}/{entry.title}"
         serialized = self.serializer.serialize_entry(entry)
         async with self.yt_client:
             async with self.yt_client.transaction():

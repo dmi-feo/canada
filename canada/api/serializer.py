@@ -108,7 +108,7 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
             "workbookId": entry.workbook_id,
             "data": entry.data,
             "unversionedData": entry.unversioned_data,
-            "key": entry.key,
+            "key": entry.title,
             "scope": entry.scope,
             "type": entry.entry_type,
             "meta": {},
@@ -135,7 +135,7 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
             workbook_id=raw_data["workbookId"],
             data=raw_data["data"],
             unversioned_data=raw_data.get("unversionedData", {}),
-            key=raw_data["name"],
+            title=raw_data["name"],
             scope=raw_data["scope"],
             entry_type=raw_data["type"],
         )
