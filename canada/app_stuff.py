@@ -6,8 +6,6 @@ from typing import Callable, Coroutine, Any, TYPE_CHECKING
 import attr
 from aiohttp.web import middleware
 
-from canada.api.serializer import SimpleCanadaApiSerializer
-
 if TYPE_CHECKING:
     from canada.base_wb_manager import BaseWorkbookManager
     from canada.api.serializer import BaseCanadaApiSerializer
@@ -21,13 +19,14 @@ class AppServices:
 
 
 def attach_services(
-        workbook_manager_factory: Callable[[Request], BaseWorkbookManager]
+        workbook_manager_factory: Callable[[Request], BaseWorkbookManager],
+        api_serializer_factory: Callable[[], BaseCanadaApiSerializer]
 ) -> Callable[[Any, Any], Coroutine[Any, Any, Any]]:
     @middleware
     async def attach_services_mw(request, handler):
         app_services = AppServices(
             wbman=workbook_manager_factory(request),
-            api_serializer=SimpleCanadaApiSerializer(),
+            api_serializer=api_serializer_factory(),
         )
         # FIXME: switch to class-based views in order to get rid of introspection
         handler_arg_names = inspect.signature(handler).parameters.keys()

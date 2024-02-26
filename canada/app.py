@@ -7,6 +7,7 @@ from aiohttp import web
 from canada.api import entry, workbook, collection
 from canada.app_stuff import attach_services
 from canada.settings import CanadaSettings
+from canada.api.serializer import SimpleCanadaApiSerializer
 import canada.api.collection.views
 import canada.api.workbook.views
 import canada.api.entry.views
@@ -84,7 +85,8 @@ def create_app(settings: CanadaSettings) -> web.Application:
                 workbook_manager_factory=get_workbook_manager_factory(
                     yt_cli_factory=yt_cli_factory,
                     root_collection_node_id=settings.ROOT_COLLECTION_NODE_ID,
-                )
+                ),
+                api_serializer_factory=lambda: SimpleCanadaApiSerializer(),
             ),
         ]
     )
