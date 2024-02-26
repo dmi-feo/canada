@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
 
+import pytest
+import aiohttp
 
-class EntityNotFound(Exception):
-    pass
+from .common import EntityNotFound
 
 
 # TODO: consider using it as a fixture or move to a lib
@@ -39,4 +40,6 @@ async def test_create_and_delete_collection(client, wb_manager):
     async with collection(client, title=coll_title) as coll_id:
         coll_obj = await wb_manager.get_collection(coll_id)
         assert coll_obj.title == coll_title
-    # TODO: check the collection was really deleted
+
+    with pytest.raises(aiohttp.client_exceptions.ClientResponseError):  # FIXME: normal exceptions
+        await wb_manager.get_collection(coll_id)
