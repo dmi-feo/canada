@@ -51,8 +51,8 @@ services:
       - ./backend-configs:/etc/backend-configs
 
   datalens-ui:
-    container_name: canada-dev-dl-ui-built
-    image: ghcr.io/dmi-feo/dloveryt_ui:20240219-1
+    container_name: canada-dev-dl-ui
+    image: ghcr.io/dmi-feo/dloveryt_ui:20240226-2
 #    build:
 #      context: ../../../datalens-ui
     develop:

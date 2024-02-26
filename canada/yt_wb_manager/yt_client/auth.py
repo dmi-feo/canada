@@ -2,7 +2,7 @@ import abc
 
 import attr
 
-from canada import constants
+from canada.yt_wb_manager import constants as yt_const
 
 
 class BaseYTAuthContext(abc.ABC):
@@ -22,5 +22,5 @@ class YTCookieAuthContext(BaseYTAuthContext):
     csrf_token: str = attr.ib(repr=False)
 
     def mutate_auth_data(self, cookies: dict[str, str], headers: dict[str, str]):
-        cookies[constants.YT_COOKIE_TOKEN_NAME] = self.cypress_cookie
-        headers[constants.YT_HEADER_CSRF_NAME] = self.csrf_token
+        cookies[yt_const.YT_COOKIE_TOKEN_NAME] = self.cypress_cookie
+        headers[yt_const.YT_HEADER_CSRF_NAME] = self.csrf_token

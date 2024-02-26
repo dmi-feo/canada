@@ -6,18 +6,19 @@ from aiohttp import web
 
 from canada.api import entry, workbook, collection
 from canada.app_stuff import attach_services
+from canada.settings import CanadaSettings
 import canada.api.collection.views
 import canada.api.workbook.views
 import canada.api.entry.views
 import canada.api.lock.views
-from canada import constants
+
 
 from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
 from canada.yt_wb_manager.yt_client.auth import YTCookieAuthContext, YTNoAuthContext
-from canada.settings import CanadaSettings
 from canada.yt_wb_manager.constants import YTAuthMode
 from canada.yt_wb_manager.wb_manager import YTWorkbookManager
 from canada.yt_wb_manager.serialization import SimpleCanadaStorageSerializer
+from canada.yt_wb_manager import constants as yt_const
 
 
 def get_yt_cli_noauth_factory(settings: CanadaSettings):
@@ -42,8 +43,8 @@ def get_yt_cli_env_cookie_auth_factory(settings: CanadaSettings):
 def get_yt_cli_request_cookie_auth_factory(settings: CanadaSettings):
     def yt_cli_factory(request: web.Request) -> SimpleYtClient:
         auth_context = YTCookieAuthContext(
-            cypress_cookie=request.cookies[constants.YT_COOKIE_TOKEN_NAME],
-            csrf_token=request.headers[constants.YT_HEADER_CSRF_NAME]
+            cypress_cookie=request.cookies[yt_const.YT_COOKIE_TOKEN_NAME],
+            csrf_token=request.headers[yt_const.YT_HEADER_CSRF_NAME]
         )
         return SimpleYtClient(yt_host=settings.YT_HOST, auth_context=auth_context, ca_file=settings.CA_FILE)
 
