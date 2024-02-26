@@ -1,38 +1,7 @@
-from contextlib import asynccontextmanager
-
 import pytest
 import aiohttp
 
-from .common import EntityNotFound
-
-
-# TODO: consider using it as a fixture or move to a lib
-@asynccontextmanager
-async def collection(client, title: str = "test_collection", parent_id: str | None = None):
-    resp = await client.post(
-        "/v1/collections",
-        json={
-            "title": title,
-            "parentId": parent_id,
-            "description": "",
-        }
-    )
-    assert resp.status == 200
-    data = await resp.json()
-    coll_id = data["collectionId"]
-    yield coll_id
-
-    try:
-        await delete_collection(client, collection_id=coll_id)
-    except EntityNotFound:
-        pass
-
-
-async def delete_collection(client, collection_id: str):
-    resp = await client.delete(f"/v1/collections/{collection_id}")
-    if resp.status == 404:
-        raise EntityNotFound()
-    assert resp.status == 200
+from .common import collection
 
 
 async def test_create_and_delete_collection(client, wb_manager):
@@ -43,3 +12,10 @@ async def test_create_and_delete_collection(client, wb_manager):
 
     with pytest.raises(aiohttp.client_exceptions.ClientResponseError):  # FIXME: normal exceptions
         await wb_manager.get_collection(coll_id)
+
+
+async def test_create_nested_collections(client, wb_manager):
+    async with collection(client, title="coll1") as coll1_id:
+        async with collection(client, title="coll2", parent_id=coll1_id) as coll2_id:
+            coll2_obj = await wb_manager.get_collection(coll2_id)
+            assert coll2_obj.parent_id == coll1_id
