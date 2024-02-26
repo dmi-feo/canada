@@ -33,7 +33,7 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
     def serialize_collection(self, collection: Collection) -> dict:
         return {
             "collectionId": collection.collection_id,
-            "parent_id": collection.parent_id,
+            "parentId": collection.parent_id,
             "title": collection.title,
             "description": collection.description,
             "meta": {},
