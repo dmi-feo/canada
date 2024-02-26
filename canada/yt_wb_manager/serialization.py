@@ -44,9 +44,17 @@ class BaseCanadaStorageSerializer(ABC):
         pass
 
 
+@attr.s
 class SimpleCanadaStorageSerializer(BaseCanadaStorageSerializer):
+    root_collection_node_id: str = attr.ib()
+
     YT_DOCUMENT_DATA_KEY: ClassVar[str] = "data"
     YT_DOCUMENT_UNVERSIONED_DATA_KEY: ClassVar[str] = "unversioned_data"
+
+    def _process_parent_id(self, parent_id: str) -> str | None:
+        if parent_id == self.root_collection_node_id:
+            return None
+        return parent_id
 
     def serialize_collection(self, collection: Collection) -> SerializableEntity:
         return SerializableEntity(
@@ -63,7 +71,7 @@ class SimpleCanadaStorageSerializer(BaseCanadaStorageSerializer):
 
         return Collection(
             collection_id=collection_id,
-            parent_id=raw_data[yt_const.YTAttributes.PARENT_ID.value],
+            parent_id=self._process_parent_id(raw_data[yt_const.YTAttributes.PARENT_ID.value]),
             title=raw_data[yt_const.YTAttributes.KEY.value],
             modification_info=ModificationInfo(
                 created_by=raw_data[yt_const.YTAttributes.OWNER.value],
@@ -86,7 +94,7 @@ class SimpleCanadaStorageSerializer(BaseCanadaStorageSerializer):
     def deserialize_workbook(self, raw_data: dict) -> Workbook:
         return Workbook(
             workbook_id=raw_data[yt_const.YTAttributes.ID.value],
-            collection_id=raw_data[yt_const.YTAttributes.PARENT_ID.value],
+            collection_id=self._process_parent_id(raw_data[yt_const.YTAttributes.PARENT_ID.value]),
             title=raw_data[yt_const.YTAttributes.KEY.value],
             modification_info=ModificationInfo(
                 created_by=raw_data[yt_const.YTAttributes.OWNER.value],

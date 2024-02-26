@@ -59,7 +59,7 @@ def get_workbook_manager_factory(
         return YTWorkbookManager(
             yt_client=yt_cli_factory(request),
             root_collection_node_id=root_collection_node_id,
-            serializer=SimpleCanadaStorageSerializer(),
+            serializer=SimpleCanadaStorageSerializer(root_collection_node_id=root_collection_node_id),
         )
     return workbook_manager_factory
 

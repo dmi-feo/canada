@@ -67,21 +67,15 @@ async def create_collection(request, verified_json: dict, app_services: AppServi
 @router.get("/v1/collections/{collection_id}/breadcrumbs")
 @response_schema(sch.CollectionBreadcrumbsResponse)
 async def get_collection_breadcrumbs(request, app_services: AppServices):
+    resp_data: list[dict[str, str]] = []
     collection_id = request.match_info["collection_id"]
-    collection = await app_services.wbman.get_collection(collection_id)
 
-    resp_data = [{
-        "collectionId": collection.collection_id,
-        "title": collection.title,
-    }]
-    while collection.parent_id:
-        try:
-            collection = await app_services.wbman.get_collection(collection.parent_id)
-        except RootCollectionCannotBeRequested:
-            break
+    while collection_id is not None:
+        collection = await app_services.wbman.get_collection(collection_id)
         resp_data.append({
             "collectionId": collection.collection_id,
             "title": collection.title,
         })
+        collection_id = collection.parent_id
 
     return reversed(resp_data)
