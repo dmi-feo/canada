@@ -37,3 +37,11 @@ async def get_workbook_entries(request, app_services: AppServices):
     workbook_id = request.match_info["workbook_id"]
     entries = await app_services.wbman.get_workbook_entries(workbook_id)
     return {"entries": [app_services.api_serializer.serialize_entry(entry) for entry in entries]}
+
+
+@router.delete('/v2/workbooks/{workbook_id}')
+@response_schema(schema.DeleteWorkbookResponse)
+async def delete_workbook(request, app_services: AppServices):
+    workbook_id = request.match_info["workbook_id"]
+    await app_services.wbman.delete_workbook(workbook_id)
+    return {}

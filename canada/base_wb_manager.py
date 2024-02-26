@@ -33,6 +33,10 @@ class BaseWorkbookManager(abc.ABC):
         pass
 
     @abc.abstractmethod
+    async def delete_workbook(self, wb_id: str):
+        pass
+
+    @abc.abstractmethod
     async def get_entry(self, entry_id: str) -> Entry:
         pass
 

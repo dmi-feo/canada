@@ -107,6 +107,10 @@ class YTWorkbookManager(BaseWorkbookManager):
             for item in dir_objects
         ]
 
+    async def delete_workbook(self, wb_id: str):
+        async with self.yt_client:
+            await self.yt_client.delete_node(wb_id)
+
     async def get_entry(self, entry_id: str) -> Entry:
         async with self.yt_client:
             raw_data = await self.yt_client.read_document(entry_id)

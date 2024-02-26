@@ -19,3 +19,7 @@ class GetWorkbookResponse(WorkbookSchema):
 
 class GetWorkbookEntriesResponse(ma.Schema):
     entries = ma.fields.Nested(EntrySchema(), many=True)
+
+
+class DeleteWorkbookResponse(ma.Schema):
+    pass
