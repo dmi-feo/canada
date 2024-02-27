@@ -28,6 +28,6 @@ async def create_lock(request: web.Request, verified_json: dict, app_services: A
 @response_schema(schema.DeleteLockResponse)
 async def delete_lock(request: web.Request, app_services: AppServices):
     entry_id = request.match_info["entry_id"]
-    lock_token = request.query.get("lockToken")
+    lock_token = request.query["lockToken"]
     await app_services.wbman.delete_lock(entry_id, lock_token)
     return {}

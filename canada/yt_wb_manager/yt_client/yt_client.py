@@ -13,7 +13,7 @@ from canada.yt_wb_manager.constants import YTNodeType, YTLockMode
 class SimpleYtClient:
     yt_host: str = attr.ib()
     auth_context: BaseYTAuthContext = attr.ib()
-    ca_file: str = attr.ib(default=None)
+    ca_file: str | None = attr.ib(default=None)
     _session: aiohttp.ClientSession | None = attr.ib(default=None)
 
     async def __aenter__(self):
@@ -43,6 +43,7 @@ class SimpleYtClient:
         if "transaction_id" in params and params["transaction_id"] is None:
             del params["transaction_id"]
 
+        assert self._session is not None
         resp = await self._session.request(
             method=method, url=f"{self.yt_host}/api/v3/{url}",
             params=params, headers=headers, json=json_data, cookies=cookies,

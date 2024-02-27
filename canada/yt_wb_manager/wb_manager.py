@@ -153,6 +153,7 @@ class YTWorkbookManager(BaseWorkbookManager):
                 )
 
                 serialized = self.serializer.serialize_entry(curr_entry)
+                assert serialized.data is not None
                 await self.yt_client.write_document(
                     node_id=entry_id,
                     data=serialized.data,
