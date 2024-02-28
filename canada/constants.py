@@ -7,6 +7,7 @@ class CanadaEntityType(enum.Enum):
     entry = "entry"
 
 
-class WellKnownIDMode(enum.Enum):
+class EntityAliasMode(enum.Enum):
     disabled = "disabled"
     from_file = "from_file"
+    from_env = "from_env"

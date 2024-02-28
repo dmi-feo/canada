@@ -74,3 +74,39 @@ class WBTestClient:
         if resp.status == 404:
             raise EntityNotFound()
         assert resp.status == 200
+
+    @asynccontextmanager
+    async def entry_ctx(self, name: str, workbook_id: str, scope: str, type: str, data: dict):
+        resp = await self.client.post(
+            "/v1/entries",
+            json={
+                "name": name,
+                "workbookId": workbook_id,
+                "scope": scope,
+                "type": type,
+                "data": data,
+            }
+        )
+        assert resp.status == 200
+        data = await resp.json()
+        entry_id = data["entryId"]
+
+        yield entry_id
+
+        try:
+            await self.delete_entry(entry_id=entry_id)
+        except EntityNotFound:
+            pass
+
+    async def delete_entry(self, entry_id: str):
+        resp = await self.client.delete(f"/v1/entries/{entry_id}")
+        if resp.status == 404:
+            raise EntityNotFound()
+        assert resp.status == 200
+
+    async def get_entry(self, entry_id: str) -> dict:
+        resp = await self.client.get(f"/v1/entries/{entry_id}")
+        assert resp.status == 200
+        data = await resp.json()
+        return data
+
