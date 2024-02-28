@@ -27,7 +27,11 @@ class YTWorkbookManager(BaseWorkbookManager):
         return self.well_known_id_manager.resolve_id(entity_id)
 
     async def list_collection(self, coll_id: str | None = None) -> CollectionContent:
-        coll_id = self._resolve_id(coll_id) or self.root_collection_node_id
+        if coll_id is not None:
+            coll_id = self._resolve_id(coll_id)
+        else:
+            coll_id = self.root_collection_node_id
+
         async with self.yt_client:
             dirs = await self.yt_client.list_dir(coll_id, attributes=yt_const.YT_ATTRS_TO_REQ)
 
@@ -66,7 +70,11 @@ class YTWorkbookManager(BaseWorkbookManager):
         return self.serializer.deserialize_collection(coll_dir)
 
     async def create_collection(self, collection: Collection):
-        parent_id = self._resolve_id(collection.parent_id) or self.root_collection_node_id
+        if collection.parent_id is not None:
+            parent_id = self._resolve_id(collection.parent_id)
+        else:
+            parent_id = self.root_collection_node_id
+
         new_node_path = f"#{parent_id}/{collection.title}"
         serialized = self.serializer.serialize_collection(collection)
         async with self.yt_client:
@@ -91,7 +99,11 @@ class YTWorkbookManager(BaseWorkbookManager):
         return self.serializer.deserialize_workbook(wb_dir)
 
     async def create_workbook(self, workbook: Workbook) -> str:
-        parent_id = self._resolve_id(workbook.collection_id) or self.root_collection_node_id
+        if workbook.collection_id is not None:
+            parent_id = self._resolve_id(workbook.collection_id)
+        else:
+            parent_id = self.root_collection_node_id
+
         new_node_path = f"#{parent_id}/{workbook.title}"
         serialized = self.serializer.serialize_workbook(workbook)
         async with self.yt_client:
