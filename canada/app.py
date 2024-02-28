@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import logging
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 
 from aiohttp import web
 
@@ -12,7 +14,8 @@ import canada.api.collection.views
 import canada.api.workbook.views
 import canada.api.entry.views
 import canada.api.lock.views
-
+from canada.constants import WellKnownIDMode
+from canada.well_known_id_manager import DummyWellKnownIDManager, InMemoryWellKnownIDManager
 
 from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
 from canada.yt_wb_manager.yt_client.auth import YTCookieAuthContext, YTNoAuthContext
@@ -20,6 +23,9 @@ from canada.yt_wb_manager.constants import YTAuthMode
 from canada.yt_wb_manager.wb_manager import YTWorkbookManager
 from canada.yt_wb_manager.serialization import SimpleCanadaStorageSerializer
 from canada.yt_wb_manager import constants as yt_const
+
+if TYPE_CHECKING:
+    from canada.well_known_id_manager import BaseWellKnownIDManager
 
 
 def get_yt_cli_noauth_factory(settings: CanadaSettings):
@@ -55,12 +61,14 @@ def get_yt_cli_request_cookie_auth_factory(settings: CanadaSettings):
 def get_workbook_manager_factory(
         yt_cli_factory: Callable[[web.Request], SimpleYtClient],
         root_collection_node_id: str,
+        well_known_id_manager: BaseWellKnownIDManager,
 ) -> Callable[[web.Request], YTWorkbookManager]:
     def workbook_manager_factory(request: web.Request) -> YTWorkbookManager:
         return YTWorkbookManager(
             yt_client=yt_cli_factory(request),
             root_collection_node_id=root_collection_node_id,
             serializer=SimpleCanadaStorageSerializer(root_collection_node_id=root_collection_node_id),
+            well_known_id_manager=well_known_id_manager,
         )
     return workbook_manager_factory
 
@@ -79,12 +87,23 @@ def create_app(settings: CanadaSettings) -> web.Application:
         case _:
             raise ValueError(f"Unknown YTAuthMode: {settings.YT_AUTH_MODE}")
 
+    well_known_id_manager: BaseWellKnownIDManager
+    match settings.WELL_KNOWN_ID_MODE:
+        case WellKnownIDMode.disabled:
+            well_known_id_manager = DummyWellKnownIDManager()
+        case WellKnownIDMode.from_file:
+            assert settings.WELL_KNOWN_ID_CONFIG_PATH is not None
+            well_known_id_manager = InMemoryWellKnownIDManager.from_file(settings.WELL_KNOWN_ID_CONFIG_PATH)
+        case _:
+            raise ValueError(f"Unknown WellKnownIDMode: {settings.WELL_KNOWN_ID_MODE}")
+
     app_instance = web.Application(
         middlewares=[
             attach_services(
                 workbook_manager_factory=get_workbook_manager_factory(
                     yt_cli_factory=yt_cli_factory,
                     root_collection_node_id=settings.ROOT_COLLECTION_NODE_ID,
+                    well_known_id_manager=well_known_id_manager,
                 ),
                 api_serializer_factory=lambda: SimpleCanadaApiSerializer(),
             ),
