@@ -15,3 +15,10 @@ where = ["."]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.mypy]
+# strict = true  # TODO: enable me
+
+[[tool.mypy.overrides]]
+module = "canada.contrib.*"
+ignore_errors = true

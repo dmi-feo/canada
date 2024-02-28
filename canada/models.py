@@ -5,10 +5,10 @@ import attr
 
 @attr.s
 class ModificationInfo:
-    created_by: str = attr.ib()
-    created_at: str = attr.ib()
-    updated_by: str = attr.ib()
-    updated_at: str = attr.ib()
+    created_by: str | None = attr.ib(default=None)
+    created_at: str | None = attr.ib(default=None)
+    updated_by: str | None = attr.ib(default=None)
+    updated_at: str | None = attr.ib(default=None)
 
 
 @attr.s
@@ -18,17 +18,17 @@ class Collection:
     title: str = attr.ib()
     description: str = attr.ib(default="")
     meta: dict = attr.ib(factory=dict)
-    modification_info: ModificationInfo | None = attr.ib(default=None)
+    modification_info: ModificationInfo = attr.ib(default=ModificationInfo())
 
 
 @attr.s
 class Workbook:
     workbook_id: str | None = attr.ib()
-    collection_id: str = attr.ib()
+    collection_id: str | None = attr.ib()
     title: str = attr.ib()
     description: str = attr.ib(default="")
     meta: dict = attr.ib(factory=dict)
-    modification_info: ModificationInfo | None = attr.ib(default=None)
+    modification_info: ModificationInfo = attr.ib(default=ModificationInfo())
 
 
 @attr.s
@@ -41,7 +41,7 @@ class Entry:
     scope: str = attr.ib()
     entry_type: str = attr.ib()
     meta: dict = attr.ib(factory=dict)
-    modification_info: ModificationInfo | None = attr.ib(default=None)
+    modification_info: ModificationInfo = attr.ib(default=ModificationInfo())
 
 
 @attr.s

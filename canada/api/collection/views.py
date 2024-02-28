@@ -67,7 +67,7 @@ async def create_collection(request, verified_json: dict, app_services: AppServi
 @router.get("/v1/collections/{collection_id}/breadcrumbs")
 @response_schema(sch.CollectionBreadcrumbsResponse)
 async def get_collection_breadcrumbs(request, app_services: AppServices):
-    resp_data: list[dict[str, str]] = []
+    resp_data: list[dict[str, str | None]] = []
     collection_id = request.match_info["collection_id"]
 
     while collection_id is not None:

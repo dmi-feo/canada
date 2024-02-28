@@ -15,7 +15,7 @@ class SerializableEntity:
     title: str = attr.ib()
     node_type: yt_const.YTNodeType = attr.ib()
     data: dict | None = attr.ib()
-    attributes: dict[str, str] | None = attr.ib()
+    attributes: dict[str, str] = attr.ib()
 
 
 class BaseCanadaStorageSerializer(ABC):
