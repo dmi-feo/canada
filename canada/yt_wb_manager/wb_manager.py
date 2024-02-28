@@ -13,6 +13,7 @@ from canada.base_wb_manager import BaseWorkbookManager
 
 if TYPE_CHECKING:
     from canada.yt_wb_manager.serialization import BaseCanadaStorageSerializer
+    from canada.well_known_id_manager import BaseWellKnownIDManager
 
 
 @attr.s
@@ -20,9 +21,17 @@ class YTWorkbookManager(BaseWorkbookManager):
     yt_client: SimpleYtClient = attr.ib()
     root_collection_node_id: str = attr.ib()
     serializer: BaseCanadaStorageSerializer = attr.ib()
+    well_known_id_manager: BaseWellKnownIDManager = attr.ib()
+
+    def _resolve_id(self, entity_id: str) -> str:
+        return self.well_known_id_manager.resolve_id(entity_id)
 
     async def list_collection(self, coll_id: str | None = None) -> CollectionContent:
-        coll_id = coll_id or self.root_collection_node_id
+        if coll_id is not None:
+            coll_id = self._resolve_id(coll_id)
+        else:
+            coll_id = self.root_collection_node_id
+
         async with self.yt_client:
             dirs = await self.yt_client.list_dir(coll_id, attributes=yt_const.YT_ATTRS_TO_REQ)
 
@@ -52,6 +61,7 @@ class YTWorkbookManager(BaseWorkbookManager):
         return CollectionContent(collections=collections, workbooks=workbooks)
 
     async def get_collection(self, coll_id: str) -> Collection:
+        coll_id = self._resolve_id(coll_id)
         if coll_id == self.root_collection_node_id:
             raise RootCollectionCannotBeRequested()
 
@@ -60,7 +70,11 @@ class YTWorkbookManager(BaseWorkbookManager):
         return self.serializer.deserialize_collection(coll_dir)
 
     async def create_collection(self, collection: Collection):
-        parent_id = collection.parent_id or self.root_collection_node_id
+        if collection.parent_id is not None:
+            parent_id = self._resolve_id(collection.parent_id)
+        else:
+            parent_id = self.root_collection_node_id
+
         new_node_path = f"#{parent_id}/{collection.title}"
         serialized = self.serializer.serialize_collection(collection)
         async with self.yt_client:
@@ -79,12 +93,17 @@ class YTWorkbookManager(BaseWorkbookManager):
             await self.yt_client.delete_node(coll_id)
 
     async def get_workbook(self, wb_id: str) -> Workbook:
+        wb_id = self._resolve_id(wb_id)
         async with self.yt_client:
             wb_dir = await self.yt_client.get_node_attributes(wb_id)
         return self.serializer.deserialize_workbook(wb_dir)
 
     async def create_workbook(self, workbook: Workbook) -> str:
-        parent_id = workbook.collection_id or self.root_collection_node_id
+        if workbook.collection_id is not None:
+            parent_id = self._resolve_id(workbook.collection_id)
+        else:
+            parent_id = self.root_collection_node_id
+
         new_node_path = f"#{parent_id}/{workbook.title}"
         serialized = self.serializer.serialize_workbook(workbook)
         async with self.yt_client:
@@ -99,6 +118,7 @@ class YTWorkbookManager(BaseWorkbookManager):
         return node_id
 
     async def get_workbook_entries(self, wb_id: str) -> list[Entry]:
+        wb_id = self._resolve_id(wb_id)
         async with self.yt_client:
             dir_objects = await self.yt_client.list_dir(wb_id, attributes=yt_const.YT_ATTRS_TO_REQ)
 
@@ -112,6 +132,7 @@ class YTWorkbookManager(BaseWorkbookManager):
             await self.yt_client.delete_node(wb_id)
 
     async def get_entry(self, entry_id: str) -> Entry:
+        entry_id = self._resolve_id(entry_id)
         async with self.yt_client:
             raw_data = await self.yt_client.read_document(entry_id)
             attributes = await self.yt_client.get_node_attributes(entry_id)
@@ -119,7 +140,7 @@ class YTWorkbookManager(BaseWorkbookManager):
         return self.serializer.deserialize_entry(raw_data, attributes=attributes)
 
     async def create_entry(self, entry: Entry) -> str:
-        new_node_path = f"#{entry.workbook_id}/{entry.title}"
+        new_node_path = f"#{self._resolve_id(entry.workbook_id)}/{entry.title}"
         serialized = self.serializer.serialize_entry(entry)
         async with self.yt_client:
             async with self.yt_client.transaction() as tx_id:

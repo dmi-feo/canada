@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 
 from canada.models import CollectionContent, Workbook, Collection, Entry
