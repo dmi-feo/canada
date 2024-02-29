@@ -1,9 +1,21 @@
+from __future__ import annotations
+
 import abc
+from typing import TYPE_CHECKING
+
+import attr
 
 from canada.models import Workbook, Collection, Entry
 
+if TYPE_CHECKING:
+    from canada.entity_alias_manager import BaseEntityAliasManager
+
 
 class BaseCanadaApiSerializer(abc.ABC):
+    @abc.abstractmethod
+    def _resolve_entity_alias(self, alias: str) -> str:
+        pass
+
     @abc.abstractmethod
     def serialize_collection(self, collection: Collection) -> dict:
         pass
@@ -29,7 +41,13 @@ class BaseCanadaApiSerializer(abc.ABC):
         pass
 
 
+@attr.s
 class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
+    entity_alias_manager: BaseEntityAliasManager = attr.ib()
+
+    def _resolve_entity_alias(self, alias: str) -> str:
+        return self.entity_alias_manager.resolve_alias(alias)
+
     def serialize_collection(self, collection: Collection) -> dict:
         return {
             "collectionId": collection.collection_id,
@@ -62,7 +80,7 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
     def deserialize_collection(self, raw_data: dict) -> Collection:
         return Collection(
             collection_id=None,
-            parent_id=raw_data["parentId"],
+            parent_id=self._resolve_entity_alias(raw_data["parentId"]),
             title=raw_data["title"],
             description=raw_data["description"],
         )
@@ -97,7 +115,7 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
     def deserialize_workbook(self, raw_data: dict) -> Workbook:
         return Workbook(
             workbook_id=None,
-            collection_id=raw_data["collectionId"],
+            collection_id=self._resolve_entity_alias(raw_data["collectionId"]),
             title=raw_data["title"],
             description=raw_data["description"],
         )
@@ -132,7 +150,7 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
     def deserialize_entry(self, raw_data: dict) -> Entry:
         return Entry(
             entry_id=None,
-            workbook_id=raw_data["workbookId"],
+            workbook_id=self._resolve_entity_alias(raw_data["workbookId"]),
             data=raw_data["data"],
             unversioned_data=raw_data.get("unversionedData", {}),
             title=raw_data["name"],
