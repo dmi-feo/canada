@@ -1,2 +1,4 @@
 pytest==9.0.0
 pytest_aiohttp==1.0.5
+bump-my-version==0.18.3
+generate-changelog==0.10.0
