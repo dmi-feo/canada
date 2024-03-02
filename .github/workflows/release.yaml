@@ -1,0 +1,32 @@
+name: Create Release
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: "Install requirements"
+        run: pip install "bump-my-version==0.18.3" "generate-changelog==0.10.0"
+
+      - name: "Setup git"
+        run: git config --global user.email "root@localhost" && git config --global user.name "Mister Releaser"
+
+      - name: "Generate changelog"
+        run: generate-changelog
+
+      - name: "Bump version"
+        run: bump-my-version bump minor
+
+      - name: "Push it"
+        run: git push --follow-tags
