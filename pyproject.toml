@@ -21,7 +21,7 @@ current_version = "0.1.0"
 commit = true
 commit_args = "--no-verify"
 tag = true
-tag_name = "release/{new_version}"
+tag_name = "{new_version}"
 message = "New version: {new_version}"
 allow_dirty = true
 
