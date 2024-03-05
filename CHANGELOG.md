@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0 (2024-03-05)
+
+[Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.4.0...0.5.0)
+
+
 ## 0.4.0 (2024-03-05)
 
 [Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.3.0...0.4.0)
