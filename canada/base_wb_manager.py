@@ -56,6 +56,10 @@ class BaseWorkbookManager(abc.ABC):
         pass
 
     @abc.abstractmethod
+    async def delete_entry(self, entry_id: str):
+        pass
+
+    @abc.abstractmethod
     async def set_lock(self, entry_id: str, duration: int | None = None, force: bool | None = None) -> str:
         pass
 

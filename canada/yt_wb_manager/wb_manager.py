@@ -170,6 +170,10 @@ class YTWorkbookManager(BaseWorkbookManager):
                     tx_id=tx_id
                 )
 
+    async def delete_entry(self, entry_id: str):
+        async with self.yt_client:
+            await self.yt_client.delete_node(node_id=entry_id)
+
     async def set_lock(self, entry_id: str, duration: int | None = None, force: bool | None = None) -> str:
         async with self.yt_client:
             tx_id = await self.yt_client.start_transaction()
