@@ -1,6 +1,13 @@
+import string
+import random
 from contextlib import asynccontextmanager
 
 import attr
+
+
+def get_random_string(length: int = 13) -> str:
+    letters = string.ascii_lowercase
+    return "".join(random.choice(letters) for _ in range(length))
 
 
 class EntityNotFound(Exception):
@@ -12,7 +19,8 @@ class WBTestClient:
     client = attr.ib()
 
     @asynccontextmanager
-    async def collection_ctx(self, title: str = "test_collection", parent_id: str | None = None):
+    async def collection_ctx(self, title: str | None = None, parent_id: str | None = None):
+        title = title or get_random_string()
         resp = await self.client.post(
             "/v1/collections",
             json={
@@ -44,7 +52,8 @@ class WBTestClient:
         assert resp.status == 200
 
     @asynccontextmanager
-    async def workbook_ctx(self, title: str = "test_workbook", collection_id: str | None = None):
+    async def workbook_ctx(self, title: str | None = None, collection_id: str | None = None):
+        title = title or get_random_string()
         resp = await self.client.post(
             "/v2/workbooks",
             json={
@@ -65,6 +74,13 @@ class WBTestClient:
 
     async def get_workbook(self, workbook_id: str) -> dict:
         resp = await self.client.get(f"/v2/workbooks/{workbook_id}")
+        assert resp.status == 200
+        data = await resp.json()
+        return data
+
+    async def get_workbook_entries(self, workbook_id: str, scope: str | None = None) -> dict:
+        params = {"scope": scope} if scope is not None else {}
+        resp = await self.client.get(f"/v2/workbooks/{workbook_id}/entries", params=params)
         assert resp.status == 200
         data = await resp.json()
         return data

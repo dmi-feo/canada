@@ -35,7 +35,8 @@ async def get_workbook(request, app_services: AppServices):
 @response_schema(schema.GetWorkbookEntriesResponse)
 async def get_workbook_entries(request, app_services: AppServices):
     workbook_id = request.match_info["workbook_id"]
-    entries = await app_services.wbman.get_workbook_entries(workbook_id)
+    scope = request.query.get("scope")
+    entries = await app_services.wbman.get_workbook_entries(workbook_id, scope=scope)
     return {"entries": [app_services.api_serializer.serialize_entry(entry) for entry in entries]}
 
 
