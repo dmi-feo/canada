@@ -32,8 +32,10 @@ class YTWorkbookManager(BaseWorkbookManager):
             self.serializer.deserialize_workbook(item[yt_const.YT_LIST_ATTRIBUTES_KEY])
             for item in dirs
             if (
-                    item[yt_const.YT_LIST_ATTRIBUTES_KEY][yt_const.YTAttributes.DL_TYPE.value] ==
-                    CanadaEntityType.workbook.value
+                    item[yt_const.YT_LIST_ATTRIBUTES_KEY].get(
+                        yt_const.YTAttributes.DL_TYPE.value,
+                        CanadaEntityType.workbook.value
+                    ) == CanadaEntityType.workbook.value
             )
         ]
 
@@ -42,7 +44,7 @@ class YTWorkbookManager(BaseWorkbookManager):
             for item in dirs
             if (
                 (
-                    item[yt_const.YT_LIST_ATTRIBUTES_KEY][yt_const.YTAttributes.DL_TYPE.value] ==
+                    item[yt_const.YT_LIST_ATTRIBUTES_KEY].get(yt_const.YTAttributes.DL_TYPE.value) ==
                     CanadaEntityType.collection.value
                 ) and (
                     item[yt_const.YT_LIST_ATTRIBUTES_KEY][yt_const.YTAttributes.ID.value] !=
@@ -115,11 +117,14 @@ class YTWorkbookManager(BaseWorkbookManager):
         return [
             self.serializer.deserialize_entry(item, attributes=item[yt_const.YT_LIST_ATTRIBUTES_KEY])
             for item in dir_objects
-            # there must have been `search` method in cypress with filtration
-            # but no trace of it in doc...
             if (
-                item[yt_const.YT_LIST_ATTRIBUTES_KEY][yt_const.YTAttributes.DL_ENTRY_SCOPE.value] == scope or
-                scope is None
+                item[yt_const.YT_LIST_ATTRIBUTES_KEY].get(yt_const.YTAttributes.DL_TYPE.value) ==
+                CanadaEntityType.entry.value and (
+                    # there must have been `search` method in cypress with filtration
+                    # but no trace of it in doc...
+                    item[yt_const.YT_LIST_ATTRIBUTES_KEY].get(yt_const.YTAttributes.DL_ENTRY_SCOPE.value) == scope or
+                    scope is None
+                )
             )
         ]
 
