@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 (2024-03-05)
+
+[Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.3.0...0.4.0)
+
+### Changes
+
+- Release pipeline with builds and branch protection (#10). [9559771](https://github.com/dmi-feo/canada/commit/9559771e7ab51c3a3e03eef08652cd21525182d9)
+    
+
 ## 0.3.0 (2024-03-02)
 
 [Compare the full difference.](https://github.com/dmi-feo/test-releases/compare/0.2.0...0.3.0)
