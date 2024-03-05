@@ -1,20 +1,14 @@
-import pathlib
-
 import pytest
 
 from canada.app import create_app
 from canada.settings import CanadaSettings
-from canada.constants import EntityAliasMode
 
 from .common import WBTestClient
 
 
 @pytest.fixture(scope="function")
 def app_settings():
-    settings = CanadaSettings.from_env()
-    settings.ENTITY_ALIAS_MODE = EntityAliasMode.from_file
-    settings.ENTITY_ALIAS_CONFIG_PATH = pathlib.Path(__file__).parent.joinpath("aliases.json").resolve()
-    return settings
+    return CanadaSettings.from_env()
 
 
 @pytest.fixture(scope="function")
