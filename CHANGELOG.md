@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.7.0 (2024-03-05)
+
+[Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.6.0...0.7.0)
+
+### Changes
+
+- Do not fail navigation on non-dl objects (#19). [80408ba](https://github.com/dmi-feo/canada/commit/80408ba09843dfbcc03196a6b10197720fa37a2a)
+    
+- Add ability to filter wb entries by scope (#18). [f408639](https://github.com/dmi-feo/canada/commit/f40863933a2311aed5e36f1cc5132a8f7b173a92)
+    
+- Add delete-entry view (#17). [c1b2888](https://github.com/dmi-feo/canada/commit/c1b288807d4b565db27e2e9b35de00787a0e3360)
+    
+- Turn off entity aliases (#16). [050cb28](https://github.com/dmi-feo/canada/commit/050cb28d31756c9a977b1bfa6d3989c33817867c)
+    
+
 ## 0.6.0 (2024-03-05)
 
 [Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.4.0...HEAD)
