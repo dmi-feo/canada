@@ -1,7 +1,10 @@
-name: Create Release
+name: create release
 
 on:
   workflow_dispatch: {}
+
+env:
+  REGISTRY: ghcr.io
 
 jobs:
   create-release:
@@ -12,7 +15,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v4
+      - name: "Install Python"
+        uses: actions/setup-python@v4
         with:
           python-version: "3.12"
 
@@ -20,7 +24,7 @@ jobs:
         run: pip install "bump-my-version==0.18.3" "generate-changelog==0.10.0"
 
       - name: "Setup git"
-        run: git config --global user.email "root@localhost" && git config --global user.name "Mister Releaser"
+        run: git config --global user.email "root@localhost" && git config --global user.name "Bobby Brown Jr"
 
       - name: "Generate changelog"
         run: generate-changelog
@@ -28,5 +32,39 @@ jobs:
       - name: "Bump version"
         run: bump-my-version bump minor
 
-      - name: "Push it"
-        run: git push --follow-tags
+      - name: "Grab the tag"
+        id: tag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+
+      - name: "Create Pull Request"
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "New version is coming: ${{ steps.tag.outputs.tag }}"
+          branch: "new-version-${{ steps.tag.outputs.tag }}"
+          body: ""
+
+      - name: "Merge Pull Request"
+        run: gh pr merge --squash --admin ${{ steps.cpr.outputs.pull-request-number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Set tag"
+        uses: mathieudutour/github-tag-action@v6.1  # TODO: race condition?
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.tag.outputs.tag }}
+          tag_prefix: ""
+
+      - name: "Log in to the Container registry"
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Build docker image"
+        run: docker build . --platform linux/amd64 -t "ghcr.io/dmi-feo/canada:${{ steps.tag.outputs.tag }}"
+
+      - name: "Push docker image"
+        run: docker push "ghcr.io/dmi-feo/canada:${{ steps.tag.outputs.tag }}"
