@@ -31,7 +31,7 @@ class BaseWorkbookManager(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def get_workbook_entries(self, wb_id: str) -> list[Entry]:
+    async def get_workbook_entries(self, wb_id: str, scope: str | None) -> list[Entry]:
         pass
 
     @abc.abstractmethod

@@ -108,13 +108,19 @@ class YTWorkbookManager(BaseWorkbookManager):
 
         return node_id
 
-    async def get_workbook_entries(self, wb_id: str) -> list[Entry]:
+    async def get_workbook_entries(self, wb_id: str, scope: str | None) -> list[Entry]:
         async with self.yt_client:
             dir_objects = await self.yt_client.list_dir(wb_id, attributes=yt_const.YT_ATTRS_TO_REQ)
 
         return [
             self.serializer.deserialize_entry(item, attributes=item[yt_const.YT_LIST_ATTRIBUTES_KEY])
             for item in dir_objects
+            # there must have been `search` method in cypress with filtration
+            # but no trace of it in doc...
+            if (
+                item[yt_const.YT_LIST_ATTRIBUTES_KEY][yt_const.YTAttributes.DL_ENTRY_SCOPE.value] == scope or
+                scope is None
+            )
         ]
 
     async def delete_workbook(self, wb_id: str):
