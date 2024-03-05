@@ -50,6 +50,13 @@ async def update_entry(request, verified_json: dict, app_services: AppServices):
 
 
 @router.get("/v1/entries/{entry_id}/meta")
-@response_schema(schema.GetEntryMeta)
+@response_schema(schema.GetEntryMetaResponse)
 async def get_entry_meta(request, app_services: AppServices):
     return {}
+
+
+@router.delete("/v1/entries/{entry_id}")
+@response_schema(schema.DeleteEntryResponse)
+async def delete_entry(request, app_services: AppServices):
+    entry_id = request.match_info["entry_id"]
+    await app_services.wbman.delete_entry(entry_id)
