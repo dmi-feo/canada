@@ -1,6 +1,10 @@
-from typing import Any
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
 import attr
+
+if TYPE_CHECKING:
+    from canada.types import JSON
 
 
 @attr.s
@@ -16,8 +20,8 @@ class Collection:
     collection_id: str | None = attr.ib()
     parent_id: str | None = attr.ib()
     title: str = attr.ib()
-    description: str = attr.ib(default="")
-    meta: dict = attr.ib(factory=dict)
+    description: str | None = attr.ib(default=None)
+    meta: dict[str, str] = attr.ib(factory=dict)
     modification_info: ModificationInfo = attr.ib(default=ModificationInfo())
 
 
@@ -26,21 +30,21 @@ class Workbook:
     workbook_id: str | None = attr.ib()
     collection_id: str | None = attr.ib()
     title: str = attr.ib()
-    description: str = attr.ib(default="")
-    meta: dict = attr.ib(factory=dict)
+    description: str | None = attr.ib(default=None)
+    meta: dict[str, str] = attr.ib(factory=dict)
     modification_info: ModificationInfo = attr.ib(default=ModificationInfo())
 
 
 @attr.s
 class Entry:
     entry_id: str | None = attr.ib()
-    data: dict = attr.ib()
-    unversioned_data: dict = attr.ib()
+    data: JSON = attr.ib()
+    unversioned_data: JSON = attr.ib()
     workbook_id: str = attr.ib()
     title: str = attr.ib()
     scope: str = attr.ib()
     entry_type: str = attr.ib()
-    meta: dict = attr.ib(factory=dict)
+    meta: dict[str, str] = attr.ib(factory=dict)
     modification_info: ModificationInfo = attr.ib(default=ModificationInfo())
 
 

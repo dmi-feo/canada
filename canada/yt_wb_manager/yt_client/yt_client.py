@@ -1,12 +1,23 @@
+from __future__ import annotations
 import ssl
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import TYPE_CHECKING, Self, Type, AsyncIterator
+from types import TracebackType
 
 import aiohttp
 import attr
 
 from canada.yt_wb_manager.yt_client.auth import BaseYTAuthContext
 from canada.yt_wb_manager.constants import YTNodeType, YTLockMode
+
+if TYPE_CHECKING:
+    from canada.types import JSON, JSONDict
+
+
+@attr.s
+class YtNode:
+    name: str = attr.ib()
+    attributes: dict[str, str] = attr.ib()
 
 
 @attr.s(slots=True)
@@ -16,18 +27,26 @@ class SimpleYtClient:
     ca_file: str | None = attr.ib(default=None)
     _session: aiohttp.ClientSession | None = attr.ib(default=None)
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         ssl_context = ssl.create_default_context(cafile=self.ca_file)
         self._session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(
+            self, exc_type: Type[BaseException] | None,
+            exc_val: BaseException | None,
+            exc_tb: TracebackType | None,
+    ) -> None:
+        assert self._session is not None
         await self._session.close()
 
     async def make_request(
-            self, method: str, url: str, params: dict | None = None, headers: dict | None = None,
-            json_data: dict | str | None = None, cookies: dict | None = None
-    ):
+            self, method: str, url: str,
+            params: dict[str, str | None] | None = None,
+            headers: dict[str, str] | None = None,
+            json_data: JSON | None = None,
+            cookies: dict[str, str] | None = None,
+    ) -> aiohttp.ClientResponse:
         headers = headers or {}
         headers.update({
             "X-YT-Input-Format": "<encode_utf8=%false>json",
@@ -53,7 +72,8 @@ class SimpleYtClient:
         return resp
 
     @asynccontextmanager
-    async def transaction(self, outer_tx_id: str | None = None):  # TODO: ensure all operations in tx send tx_id
+    async def transaction(self, outer_tx_id: str | None = None) -> AsyncIterator[str]:
+        # TODO: ensure all operations in tx send tx_id
         tx_id = await self.start_transaction(outer_tx_id=outer_tx_id)
         try:
             yield tx_id
@@ -68,91 +88,101 @@ class SimpleYtClient:
             "POST", "start_tx",
             params={"transaction_id": outer_tx_id}
         )
-        return await resp.json()
+        return str(await resp.json())
 
-    async def commit_transaction(self, tx_id: str):
+    async def commit_transaction(self, tx_id: str) -> None:
         await self.make_request(
             "POST", "commit_tx", params={"transaction_id": tx_id}
         )
 
-    async def abort_transaction(self, tx_id: str):
+    async def abort_transaction(self, tx_id: str) -> None:
         await self.make_request(
             "POST", "abort_tx", params={"transaction_id": tx_id}
         )
 
     async def create_node(
             self, path: str, node_type: YTNodeType, ignore_existing: bool = True,
-            attributes: dict[str, Any] | None = None,
+            attributes: JSONDict | None = None,
             tx_id: str | None = None
-    ):
+    ) -> str:
         attributes = attributes or {}
         resp = await self.make_request(
             "POST", "create",
             params={
                 "path": path,
                 "type": node_type.value,
-                "ignore_existing": int(ignore_existing),
+                "ignore_existing": str(int(ignore_existing)),
                 "transaction_id": tx_id,
             },
             json_data={"attributes": attributes}
         )
-        node_id = await resp.json()
+        node_id = str(await resp.json())
         return node_id
 
-    async def write_file(self, node_id: str, file_data: dict, tx_id: str | None = None):
+    async def write_file(self, node_id: str, file_data: JSON, tx_id: str | None = None) -> None:
         await self.make_request(
             "PUT", "write_file",
             params={"path": f"#{node_id}", "transaction_id": tx_id}, json_data=file_data
         )
 
-    async def read_file(self, node_id: str, tx_id: str | None = None):
+    async def read_file(self, node_id: str, tx_id: str | None = None) -> str:
         resp = await self.make_request(
             "GET", "read_file",
             params={"path": f"#{node_id}", "transaction_id": tx_id}
         )
         return await resp.text()
 
-    async def write_document(self, node_id: str, data: dict, tx_id: str | None = None):
+    async def write_document(self, node_id: str, data: JSON, tx_id: str | None = None) -> None:
         await self.make_request(
             "PUT", "set",
             params={"path": f"#{node_id}", "transaction_id": tx_id}, json_data=data
         )
 
-    async def read_document(self, node_id: str, tx_id: str | None = None):
+    async def read_document(self, node_id: str, tx_id: str | None = None) -> JSON:
         resp = await self.make_request(
             "GET", "get",
             params={"path": f"#{node_id}", "transaction_id": tx_id}
         )
-        return await resp.json()
+        data = await resp.json()
+        assert isinstance(data, dict)
+        return data
 
-    async def get_node_attributes(self, node_id: str, tx_id: str | None = None):
+    async def get_node_attributes(self, node_id: str, tx_id: str | None = None) -> dict[str, str]:
         resp = await self.make_request(
             "GET", "get",
             params={"path": f"#{node_id}/@", "transaction_id": tx_id}
         )
-        return await resp.json()
+        data = await resp.json()
+        assert isinstance(data, dict)
+        return data
 
-    async def list_dir(self, node_id: str, attributes: list[str], tx_id: str | None = None):
+    async def list_dir(
+            self, node_id: str, attributes: list[str], tx_id: str | None = None
+    ) -> list[YtNode]:
         resp = await self.make_request(
             "POST", "list",
-            json_data={"path": f"#{node_id}", "attributes": attributes},
+            # error: Dict entry 1 has incompatible type "str": "list[str]";
+            # expected "str": "dict[str, JSON] | list[JSON] | str | int | float | None"  [dict-item]
+            json_data={"path": f"#{node_id}", "attributes": attributes},  # type: ignore
             params={"transaction_id": tx_id}
         )
         data = await resp.json()
-        return data
+        assert isinstance(data, list)
+        nodes = [YtNode(name=item["$value"], attributes=item["$attributes"]) for item in data]
+        return nodes
 
-    async def set_attribute(self, node_id: str, attr_name: str, attr_value: str, tx_id: str | None = None):
+    async def set_attribute(self, node_id: str, attr_name: str, attr_value: str, tx_id: str | None = None) -> None:
         await self.make_request(
             "PUT", "set",
             params={
                 "path": f"#{node_id}/@{attr_name}",
-                "encode_utf8": 0,
+                "encode_utf8": "0",
                 "transaction_id": tx_id,
             },
             json_data=attr_value,
         )
 
-    async def delete_node(self, node_id: str, tx_id: str | None = None):
+    async def delete_node(self, node_id: str, tx_id: str | None = None) -> None:
         await self.make_request(
             "POST", "remove",
             json_data={"path": f"#{node_id}"},
@@ -169,7 +199,7 @@ class SimpleYtClient:
         )
         return tx_id
 
-    async def delete_lock(self, node_id: str, tx_id: str):
+    async def delete_lock(self, node_id: str, tx_id: str) -> None:
         await self.make_request(
             "POST", "unlock",
             json_data={"path": f"#{node_id}"},

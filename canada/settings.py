@@ -1,4 +1,5 @@
 import os
+from typing import Self
 
 import attr
 
@@ -13,7 +14,7 @@ class CanadaSettings:
     CA_FILE: str | None = attr.ib(default=None)
 
     @classmethod
-    def from_env(cls):
+    def from_env(cls) -> Self:
         return cls(
             YT_HOST=os.environ["YT_HOST"],
             ROOT_COLLECTION_NODE_ID=os.environ["ROOT_COLLECTION_NODE_ID"],
