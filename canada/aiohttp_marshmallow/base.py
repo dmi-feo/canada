@@ -7,9 +7,7 @@ from aiohttp import web
 from aiohttp.web_response import Response
 
 from canada.app_stuff import BaseView
-
-if TYPE_CHECKING:
-    from canada.types import JSON, JSONDict
+from canada.types import JSON, JSONDict
 
 
 ViewType = TypeVar("ViewType", bound=BaseView)

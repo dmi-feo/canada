@@ -2,4 +2,4 @@ from typing import TypeAlias
 
 
 JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
-JSONDict: TypeAlias = dict[str, "JSON"]
+JSONDict: TypeAlias = dict[str, JSON]
