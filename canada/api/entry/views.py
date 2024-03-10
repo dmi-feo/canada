@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from aiohttp import web
 
-from canada.aiohttp_marshmallow.base import handler_with_schema
+from canada.aiohttp_marshmallow.base import with_schema
 from canada.api.entry import schema
 from canada.app_stuff import BaseView
 
@@ -17,7 +17,7 @@ router = web.RouteTableDef()
 @router.view('/v1/entries/{entry_id}')
 @router.view('/private/entries/{entry_id}')
 class EntryItemView(BaseView):
-    @handler_with_schema(resp_schema=schema.GetEntryResponse)
+    @with_schema(resp_schema=schema.GetEntryResponse)
     async def get(self, data: JSONDict) -> JSON:
         """
         Get entry
@@ -27,7 +27,7 @@ class EntryItemView(BaseView):
 
         return self.app_services.api_serializer.serialize_entry(entry)
 
-    @handler_with_schema(req_schema=schema.UpdateEntryRequest, resp_schema=schema.UpdateEntryResponse)
+    @with_schema(req_schema=schema.UpdateEntryRequest, resp_schema=schema.UpdateEntryResponse)
     async def post(self, data: JSONDict) -> JSON:
         """
         Update entry
@@ -51,7 +51,7 @@ class EntryItemView(BaseView):
 
         return {"entryId": entry_id}
 
-    @handler_with_schema(resp_schema=schema.DeleteEntryResponse)
+    @with_schema(resp_schema=schema.DeleteEntryResponse)
     async def delete(self, data: JSONDict) -> JSON:
         """
         Delete entry
@@ -64,7 +64,7 @@ class EntryItemView(BaseView):
 @router.view("/v1/entries")
 @router.view("/private/entries")
 class EntriesView(BaseView):
-    @handler_with_schema(req_schema=schema.CreateEntryRequest, resp_schema=schema.CreateEntryResponse)
+    @with_schema(req_schema=schema.CreateEntryRequest, resp_schema=schema.CreateEntryResponse)
     async def post(self, data: JSONDict) -> JSON:
         """
         Create entry
@@ -77,7 +77,7 @@ class EntriesView(BaseView):
 
 @router.view("/v1/entries/{entry_id}/meta")
 class EntryMetaView(BaseView):
-    @handler_with_schema(resp_schema=schema.GetEntryMetaResponse)
+    @with_schema(resp_schema=schema.GetEntryMetaResponse)
     async def get(self, data: JSONDict) -> JSON:
         """
         Get entry meta

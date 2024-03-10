@@ -1,6 +1,6 @@
 from __future__ import annotations
 import functools
-from typing import Type, Awaitable, Callable, TYPE_CHECKING, TypeVar
+from typing import Type, Awaitable, Callable, TYPE_CHECKING, TypeVar, TypeAlias
 
 import marshmallow as ma
 from aiohttp import web
@@ -14,19 +14,15 @@ if TYPE_CHECKING:
 
 ViewType = TypeVar("ViewType", bound=BaseView)
 
+View: TypeAlias = Callable[[ViewType], Awaitable[Response]]
+ViewExpectingData: TypeAlias = Callable[[ViewType, JSONDict], Awaitable[JSON]]
 
-def handler_with_schema(
+
+def with_schema(
         req_schema: Type[ma.Schema] | None = None,
         resp_schema: Type[ma.Schema] = ma.Schema
-) -> Callable[
-    [Callable[[ViewType, JSONDict], Awaitable[JSON]]],
-    Callable[[ViewType], Awaitable[Response]]
-]:
-    def wrapper(
-            coro: Callable[
-                [ViewType, JSONDict],
-                Awaitable[JSON]]
-    ) -> Callable[[ViewType], Awaitable[web.Response]]:
+) -> Callable[[ViewExpectingData[ViewType]], View[ViewType]]:
+    def wrapper(coro: ViewExpectingData[ViewType]) -> View[ViewType]:
         @functools.wraps(coro)
         async def wrapped(view_instance: ViewType) -> web.Response:
             if req_schema is not None:

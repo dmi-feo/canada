@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from aiohttp import web
 
-from canada.aiohttp_marshmallow.base import handler_with_schema
+from canada.aiohttp_marshmallow.base import with_schema
 from canada.api.workbook import schema
 from canada.app_stuff import BaseView
 
@@ -16,7 +16,7 @@ router = web.RouteTableDef()
 
 @router.view("/v2/workbooks")
 class WorkbooksView(BaseView):
-    @handler_with_schema(req_schema=schema.CreateWorkbookRequest, resp_schema=schema.CreateWorkbookResponse)
+    @with_schema(req_schema=schema.CreateWorkbookRequest, resp_schema=schema.CreateWorkbookResponse)
     async def post(self, data: JSONDict) -> JSON:
         """
         Create workbook
@@ -29,7 +29,7 @@ class WorkbooksView(BaseView):
 
 @router.view("/v2/workbooks/{workbook_id}")
 class WorkbookItemView(BaseView):
-    @handler_with_schema(resp_schema=schema.GetWorkbookResponse)
+    @with_schema(resp_schema=schema.GetWorkbookResponse)
     async def get(self, data: JSONDict) -> JSON:
         """
         Get workbook info
@@ -38,7 +38,7 @@ class WorkbookItemView(BaseView):
         workbook = await self.app_services.wbman.get_workbook(workbook_id)
         return self.app_services.api_serializer.serialize_workbook(workbook)
 
-    @handler_with_schema(resp_schema=schema.DeleteWorkbookResponse)
+    @with_schema(resp_schema=schema.DeleteWorkbookResponse)
     async def delete(self, data: JSONDict) -> JSON:
         """
         Delete workbook
@@ -50,7 +50,7 @@ class WorkbookItemView(BaseView):
 
 @router.view("/v2/workbooks/{workbook_id}/entries")
 class WorkbookEntriesView(BaseView):
-    @handler_with_schema(resp_schema=schema.GetWorkbookEntriesResponse)
+    @with_schema(resp_schema=schema.GetWorkbookEntriesResponse)
     async def get(self, data: JSON) -> JSON:
         """
         Get workbook entries

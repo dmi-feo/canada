@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from aiohttp import web
 
 import canada.api.collection.schema as sch
-from canada.aiohttp_marshmallow.base import handler_with_schema
+from canada.aiohttp_marshmallow.base import with_schema
 from canada.app_stuff import BaseView
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ router = web.RouteTableDef()
 
 @router.view("/v1/root-collection-permissions")
 class RootCollectionPermissionsView(BaseView):
-    @handler_with_schema(resp_schema=sch.RootCollectionPermissionsResponse)
+    @with_schema(resp_schema=sch.RootCollectionPermissionsResponse)
     async def get(self, data: JSONDict) -> JSON:
         """
         Get root collection permissions
@@ -29,7 +29,7 @@ class RootCollectionPermissionsView(BaseView):
 
 @router.view("/v1/collection-content")
 class CollectionContentView(BaseView):
-    @handler_with_schema(resp_schema=sch.CollectionContentResponseSchema)
+    @with_schema(resp_schema=sch.CollectionContentResponseSchema)
     async def get(self, data: JSONDict) -> JSON:
         """
         Get collection content
@@ -49,7 +49,7 @@ class CollectionContentView(BaseView):
 
 @router.view("/v1/collections/{collection_id}")
 class CollectionItemView(BaseView):
-    @handler_with_schema(resp_schema=sch.CollectionResponseSchema)
+    @with_schema(resp_schema=sch.CollectionResponseSchema)
     async def get(self, data: JSONDict) -> JSON:
         """
         Get collection info
@@ -58,7 +58,7 @@ class CollectionItemView(BaseView):
         collection = await self.app_services.wbman.get_collection(collection_id)
         return self.app_services.api_serializer.serialize_collection(collection)
 
-    @handler_with_schema(resp_schema=sch.DeleteCollectionResponse)
+    @with_schema(resp_schema=sch.DeleteCollectionResponse)
     async def delete(self, data: JSONDict) -> JSON:
         """
         Delete collection
@@ -70,7 +70,7 @@ class CollectionItemView(BaseView):
 
 @router.view("/v1/collections")
 class CollectionsView(BaseView):
-    @handler_with_schema(req_schema=sch.CreateCollectionRequest, resp_schema=sch.CreateCollectionResponse)
+    @with_schema(req_schema=sch.CreateCollectionRequest, resp_schema=sch.CreateCollectionResponse)
     async def post(self, data: JSONDict) -> JSON:
         """
         Create collection
@@ -83,7 +83,7 @@ class CollectionsView(BaseView):
 
 @router.view("/v1/collections/{collection_id}/breadcrumbs")
 class CollectionBreadcrumbsView(BaseView):
-    @handler_with_schema(resp_schema=sch.CollectionBreadcrumbsResponse)
+    @with_schema(resp_schema=sch.CollectionBreadcrumbsResponse)
     async def get(self, data: JSONDict) -> JSON:
         resp_data = []
         collection_id: str | None = self.request.match_info["collection_id"]

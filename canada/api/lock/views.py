@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from aiohttp import web
 
-from canada.aiohttp_marshmallow.base import handler_with_schema
+from canada.aiohttp_marshmallow.base import with_schema
 from canada.api.lock import schema
 from canada.app_stuff import BaseView
 
@@ -16,7 +16,7 @@ router = web.RouteTableDef()
 
 @router.view("/v1/locks/{entry_id}")
 class LockView(BaseView):
-    @handler_with_schema(req_schema=schema.CreateLockRequest, resp_schema=schema.CreateLockResponse)
+    @with_schema(req_schema=schema.CreateLockRequest, resp_schema=schema.CreateLockResponse)
     async def post(self, data: JSONDict) -> JSON:
         """
         Create lock for entry
@@ -36,7 +36,7 @@ class LockView(BaseView):
         )
         return {"lockToken": lock_id}
 
-    @handler_with_schema(resp_schema=schema.DeleteLockResponse)
+    @with_schema(resp_schema=schema.DeleteLockResponse)
     async def delete(self, data: JSONDict) -> JSON:
         """
         Delete lock for entry
