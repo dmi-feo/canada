@@ -5,6 +5,8 @@ from typing import Callable, TYPE_CHECKING, Awaitable
 import attr
 from aiohttp.web import middleware, View
 
+from canada.constants import REQUEST_KEY_APP_SERVICES
+
 if TYPE_CHECKING:
     from canada.base_wb_manager import BaseWorkbookManager
     from canada.api.serializer import BaseCanadaApiSerializer
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
 class BaseView(View):
     def __init__(self, request: Request) -> None:
         super().__init__(request)
-        self.app_services: AppServices = request["app_services"]
+        self.app_services: AppServices = request[REQUEST_KEY_APP_SERVICES]
 
 
 @attr.s
@@ -35,7 +37,7 @@ def attach_services(
             api_serializer=api_serializer_factory(),
         )
 
-        request["app_services"] = app_services
+        request[REQUEST_KEY_APP_SERVICES] = app_services
         resp = await handler(request)
         return resp
 

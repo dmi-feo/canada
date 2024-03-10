@@ -85,6 +85,9 @@ class CollectionsView(BaseView):
 class CollectionBreadcrumbsView(BaseView):
     @with_schema(resp_schema=sch.CollectionBreadcrumbsResponse)
     async def get(self, data: JSONDict) -> JSON:
+        """
+        Get collection breadcrumbs
+        """
         resp_data = []
         collection_id: str | None = self.request.match_info["collection_id"]
 
