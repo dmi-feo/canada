@@ -1,41 +1,45 @@
 from __future__ import annotations
 
 import abc
+from typing import TYPE_CHECKING
 
 import attr
 
 from canada.models import Workbook, Collection, Entry
 
+if TYPE_CHECKING:
+    from canada.types import JSONDict
+
 
 class BaseCanadaApiSerializer(abc.ABC):
     @abc.abstractmethod
-    def serialize_collection(self, collection: Collection) -> dict:
+    def serialize_collection(self, collection: Collection) -> JSONDict:
         pass
 
     @abc.abstractmethod
-    def deserialize_collection(self, raw_data: dict) -> Collection:
+    def deserialize_collection(self, raw_data: JSONDict) -> Collection:
         pass
 
     @abc.abstractmethod
-    def serialize_workbook(self, workbook: Workbook) -> dict:
+    def serialize_workbook(self, workbook: Workbook) -> JSONDict:
         pass
 
     @abc.abstractmethod
-    def deserialize_workbook(self, raw_data: dict) -> Workbook:
+    def deserialize_workbook(self, raw_data: JSONDict) -> Workbook:
         pass
 
     @abc.abstractmethod
-    def serialize_entry(self, entry: Entry) -> dict:
+    def serialize_entry(self, entry: Entry) -> JSONDict:
         pass
 
     @abc.abstractmethod
-    def deserialize_entry(self, raw_data: dict) -> Entry:
+    def deserialize_entry(self, raw_data: JSONDict) -> Entry:
         pass
 
 
 @attr.s
 class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
-    def serialize_collection(self, collection: Collection) -> dict:
+    def serialize_collection(self, collection: Collection) -> JSONDict:
         return {
             "collectionId": collection.collection_id,
             "parentId": collection.parent_id,
@@ -64,7 +68,11 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
             },
         }
 
-    def deserialize_collection(self, raw_data: dict) -> Collection:
+    def deserialize_collection(self, raw_data: JSONDict) -> Collection:
+        assert isinstance(raw_data["parentId"], str) or raw_data["parentId"] is None
+        assert isinstance(raw_data["title"], str)
+        assert isinstance(raw_data["description"], str) or raw_data["description"] is None
+
         return Collection(
             collection_id=None,
             parent_id=raw_data["parentId"],
@@ -72,7 +80,7 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
             description=raw_data["description"],
         )
 
-    def serialize_workbook(self, workbook: Workbook) -> dict:
+    def serialize_workbook(self, workbook: Workbook) -> JSONDict:
         return {
             "workbookId": workbook.workbook_id,
             "collectionId": workbook.collection_id,
@@ -99,7 +107,11 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
             },
         }
 
-    def deserialize_workbook(self, raw_data: dict) -> Workbook:
+    def deserialize_workbook(self, raw_data: JSONDict) -> Workbook:
+        assert isinstance(raw_data["collectionId"], str) or raw_data["collectionId"] is None
+        assert isinstance(raw_data["title"], str)
+        assert isinstance(raw_data["description"], str) or raw_data["description"] is None
+
         return Workbook(
             workbook_id=None,
             collection_id=raw_data["collectionId"],
@@ -107,7 +119,7 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
             description=raw_data["description"],
         )
 
-    def serialize_entry(self, entry: Entry) -> dict:
+    def serialize_entry(self, entry: Entry) -> JSONDict:
         return {
             "entryId": entry.entry_id,
             "workbookId": entry.workbook_id,
@@ -134,7 +146,12 @@ class SimpleCanadaApiSerializer(BaseCanadaApiSerializer):
             },
         }
 
-    def deserialize_entry(self, raw_data: dict) -> Entry:
+    def deserialize_entry(self, raw_data: JSONDict) -> Entry:
+        assert isinstance(raw_data["workbookId"], str)
+        assert isinstance(raw_data["name"], str)
+        assert isinstance(raw_data["scope"], str)
+        assert isinstance(raw_data["type"], str)
+
         return Entry(
             entry_id=None,
             workbook_id=raw_data["workbookId"],

@@ -23,7 +23,7 @@ from canada.yt_wb_manager.serialization import SimpleCanadaStorageSerializer
 from canada.yt_wb_manager import constants as yt_const
 
 
-def get_yt_cli_noauth_factory(settings: CanadaSettings):
+def get_yt_cli_noauth_factory(settings: CanadaSettings) -> Callable[[web.Request], SimpleYtClient]:
     def yt_cli_factory(request: web.Request) -> SimpleYtClient:
         auth_context = YTNoAuthContext()
         return SimpleYtClient(yt_host=settings.YT_HOST, auth_context=auth_context, ca_file=settings.CA_FILE)
@@ -31,7 +31,7 @@ def get_yt_cli_noauth_factory(settings: CanadaSettings):
     return yt_cli_factory
 
 
-def get_yt_cli_env_cookie_auth_factory(settings: CanadaSettings):
+def get_yt_cli_env_cookie_auth_factory(settings: CanadaSettings) -> Callable[[web.Request], SimpleYtClient]:
     def yt_cli_factory(request: web.Request) -> SimpleYtClient:
         auth_context = YTCookieAuthContext(
             cypress_cookie=os.environ["YT_COOKIE"],
@@ -42,7 +42,7 @@ def get_yt_cli_env_cookie_auth_factory(settings: CanadaSettings):
     return yt_cli_factory
 
 
-def get_yt_cli_request_cookie_auth_factory(settings: CanadaSettings):
+def get_yt_cli_request_cookie_auth_factory(settings: CanadaSettings) -> Callable[[web.Request], SimpleYtClient]:
     def yt_cli_factory(request: web.Request) -> SimpleYtClient:
         auth_context = YTCookieAuthContext(
             cypress_cookie=request.cookies[yt_const.YT_COOKIE_TOKEN_NAME],
@@ -101,7 +101,7 @@ async def gunicorn_app() -> web.Application:
     return create_app(settings=CanadaSettings.from_env())
 
 
-def configure_routes(app_instance: web.Application):
+def configure_routes(app_instance: web.Application) -> None:
     app_instance.add_routes(canada.api.entry.views.router)
     app_instance.add_routes(canada.api.workbook.views.router)
     app_instance.add_routes(canada.api.collection.views.router)

@@ -42,7 +42,7 @@ replace = "{current_version}...{new_version}"
 asyncio_mode = "auto"
 
 [tool.mypy]
-# strict = true  # TODO: enable me
+strict = true
 
 [[tool.mypy.overrides]]
 module = "canada.contrib.*"

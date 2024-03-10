@@ -1,27 +1,37 @@
+from __future__ import annotations
 import functools
-from typing import Type
+from typing import Type, Awaitable, Callable, TYPE_CHECKING, TypeVar, TypeAlias
 
 import marshmallow as ma
 from aiohttp import web
+from aiohttp.web_response import Response
+
+from canada.app_stuff import BaseView
+from canada.types import JSON, JSONDict
 
 
-def response_schema(schema: Type[ma.Schema]):
-    def wrapper(coro):
+ViewType = TypeVar("ViewType", bound=BaseView)
+
+View: TypeAlias = Callable[[ViewType], Awaitable[Response]]
+ViewExpectingData: TypeAlias = Callable[[ViewType, JSONDict], Awaitable[JSON]]
+
+
+def with_schema(
+        req_schema: Type[ma.Schema] | None = None,
+        resp_schema: Type[ma.Schema] = ma.Schema
+) -> Callable[[ViewExpectingData[ViewType]], View[ViewType]]:
+    def wrapper(coro: ViewExpectingData[ViewType]) -> View[ViewType]:
         @functools.wraps(coro)
-        async def wrapped(*args, **kwargs):
-            json_data = await coro(*args, **kwargs)
-            resp = web.json_response(schema().dump(json_data))
+        async def wrapped(view_instance: ViewType) -> web.Response:
+            if req_schema is not None:
+                incoming_json_data = await view_instance.request.json()
+                ma_deser = req_schema().load(incoming_json_data)
+            else:
+                ma_deser = {}
+            out_data = await coro(view_instance, ma_deser)
+            resp = web.json_response(resp_schema().dump(out_data))
             return resp
-        return wrapped
-    return wrapper
 
-
-def request_schema(schema: Type[ma.Schema]):
-    def wrapper(coro):
-        @functools.wraps(coro)
-        async def wrapped(request, *args, **kwargs):
-            json_data = await request.json()
-            ma_deser = schema().load(json_data)
-            return await coro(request, *args, **kwargs, verified_json=ma_deser)
         return wrapped
+
     return wrapper

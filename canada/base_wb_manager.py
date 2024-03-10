@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import abc
+from typing import TYPE_CHECKING
 
 from canada.models import CollectionContent, Workbook, Collection, Entry
+
+if TYPE_CHECKING:
+    from canada.types import JSONDict
 
 
 class BaseWorkbookManager(abc.ABC):
@@ -15,11 +19,11 @@ class BaseWorkbookManager(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def create_collection(self, collection: Collection):
+    async def create_collection(self, collection: Collection) -> str:
         pass
 
     @abc.abstractmethod
-    async def delete_collection(self, coll_id: str):
+    async def delete_collection(self, coll_id: str) -> None:
         pass
 
     @abc.abstractmethod
@@ -35,7 +39,7 @@ class BaseWorkbookManager(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def delete_workbook(self, wb_id: str):
+    async def delete_workbook(self, wb_id: str) -> None:
         pass
 
     @abc.abstractmethod
@@ -49,14 +53,14 @@ class BaseWorkbookManager(abc.ABC):
     @abc.abstractmethod
     async def update_entry(
             self, entry_id: str,
-            entry_data: dict | None, unversioned_data: dict | None,
+            entry_data: JSONDict | None, unversioned_data: JSONDict | None,
             lock_token: str | None = None,
-    ):
+    ) -> None:
         # TODO: introduce EntryUpdate object
         pass
 
     @abc.abstractmethod
-    async def delete_entry(self, entry_id: str):
+    async def delete_entry(self, entry_id: str) -> None:
         pass
 
     @abc.abstractmethod
@@ -64,5 +68,5 @@ class BaseWorkbookManager(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def delete_lock(self, entry_id: str, lock_id: str):
+    async def delete_lock(self, entry_id: str, lock_id: str) -> None:
         pass
