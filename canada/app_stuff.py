@@ -1,17 +1,18 @@
 from __future__ import annotations
 
-from typing import Callable, TYPE_CHECKING, Awaitable
+from typing import TYPE_CHECKING, Awaitable, Callable
 
 import attr
-from aiohttp.web import middleware, View
+from aiohttp.web import View, middleware
 
 from canada.constants import REQUEST_KEY_APP_SERVICES
 
 if TYPE_CHECKING:
-    from canada.base_wb_manager import BaseWorkbookManager
-    from canada.api.serializer import BaseCanadaApiSerializer
-    from aiohttp.web import Request, StreamResponse
     from aiohttp.typedefs import Handler
+    from aiohttp.web import Request, StreamResponse
+
+    from canada.api.serializer import BaseCanadaApiSerializer
+    from canada.base_wb_manager import BaseWorkbookManager
 
 
 class BaseView(View):

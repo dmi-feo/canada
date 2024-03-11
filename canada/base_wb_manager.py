@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 from typing import TYPE_CHECKING
 
-from canada.models import CollectionContent, Workbook, Collection, Entry
+from canada.models import Collection, CollectionContent, Entry, Workbook
 
 if TYPE_CHECKING:
     from canada.types import JSONDict

@@ -4,17 +4,17 @@ from typing import TYPE_CHECKING
 
 import attr
 
-from canada.constants import CanadaEntityType
-from canada.yt_wb_manager.exc import RootCollectionCannotBeRequested
-from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
-from canada.models import CollectionContent, Workbook, Collection, Entry
-from canada.yt_wb_manager import constants as yt_const
-from canada.yt_wb_manager.serialization import SerializableEntity
 from canada.base_wb_manager import BaseWorkbookManager
+from canada.constants import CanadaEntityType
+from canada.models import Collection, CollectionContent, Entry, Workbook
+from canada.yt_wb_manager import constants as yt_const
+from canada.yt_wb_manager.exc import RootCollectionCannotBeRequested
+from canada.yt_wb_manager.serialization import SerializableEntity
+from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
 
 if TYPE_CHECKING:
-    from canada.yt_wb_manager.serialization import BaseCanadaStorageSerializer
     from canada.types import JSONDict
+    from canada.yt_wb_manager.serialization import BaseCanadaStorageSerializer
 
 
 @attr.s

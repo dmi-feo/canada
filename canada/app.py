@@ -1,25 +1,25 @@
 from __future__ import annotations
 
-import os
 import logging
+import os
 from typing import Callable
 
 from aiohttp import web
 
-from canada.app_stuff import attach_services
-from canada.settings import CanadaSettings
-from canada.api.serializer import SimpleCanadaApiSerializer
 import canada.api.collection.views
-import canada.api.workbook.views
 import canada.api.entry.views
 import canada.api.lock.views
-
-from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
-from canada.yt_wb_manager.yt_client.auth import YTCookieAuthContext, YTNoAuthContext
-from canada.yt_wb_manager.constants import YTAuthMode
-from canada.yt_wb_manager.wb_manager import YTWorkbookManager
-from canada.yt_wb_manager.serialization import SimpleCanadaStorageSerializer
+import canada.api.workbook.views
+from canada.api.serializer import SimpleCanadaApiSerializer
+from canada.app_stuff import attach_services
+from canada.settings import CanadaSettings
 from canada.yt_wb_manager import constants as yt_const
+from canada.yt_wb_manager.constants import YTAuthMode
+from canada.yt_wb_manager.serialization import SimpleCanadaStorageSerializer
+from canada.yt_wb_manager.wb_manager import YTWorkbookManager
+from canada.yt_wb_manager.yt_client.auth import (YTCookieAuthContext,
+                                                 YTNoAuthContext)
+from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
 
 
 def get_yt_cli_noauth_factory(settings: CanadaSettings) -> Callable[[web.Request], SimpleYtClient]:

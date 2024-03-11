@@ -1,14 +1,15 @@
 from __future__ import annotations
+
 import ssl
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, Self, Type, AsyncIterator
 from types import TracebackType
+from typing import TYPE_CHECKING, AsyncIterator, Self, Type
 
 import aiohttp
 import attr
 
+from canada.yt_wb_manager.constants import YTLockMode, YTNodeType
 from canada.yt_wb_manager.yt_client.auth import BaseYTAuthContext
-from canada.yt_wb_manager.constants import YTNodeType, YTLockMode
 
 if TYPE_CHECKING:
     from canada.types import JSON, JSONDict
