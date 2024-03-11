@@ -32,9 +32,7 @@ class LockView(BaseView):
         if force is not None:
             assert isinstance(force, bool)
 
-        lock_id = await self.app_services.wbman.set_lock(
-            entry_id, duration=duration, force=force
-        )
+        lock_id = await self.app_services.wbman.set_lock(entry_id, duration=duration, force=force)
         return {"lockToken": lock_id}
 
     @with_schema(resp_schema=schema.DeleteLockResponse)

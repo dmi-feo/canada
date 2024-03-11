@@ -27,7 +27,7 @@ class WBTestClient:
                 "title": title,
                 "parentId": parent_id,
                 "description": "",
-            }
+            },
         )
         assert resp.status == 200
         data = await resp.json()
@@ -60,7 +60,7 @@ class WBTestClient:
                 "title": title,
                 "collectionId": collection_id,
                 "description": "",
-            }
+            },
         )
         assert resp.status == 200
         data = await resp.json()
@@ -101,7 +101,7 @@ class WBTestClient:
                 "scope": scope,
                 "type": type,
                 "data": data,
-            }
+            },
         )
         assert resp.status == 200
         data = await resp.json()
@@ -125,4 +125,3 @@ class WBTestClient:
         assert resp.status == 200
         data = await resp.json()
         return data
-

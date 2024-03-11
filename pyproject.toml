@@ -47,3 +47,9 @@ strict = true
 [[tool.mypy.overrides]]
 module = "canada.contrib.*"
 ignore_errors = true
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+line_length = 120

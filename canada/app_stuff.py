@@ -28,8 +28,8 @@ class AppServices:
 
 
 def attach_services(
-        workbook_manager_factory: Callable[[Request], BaseWorkbookManager],
-        api_serializer_factory: Callable[[], BaseCanadaApiSerializer]
+    workbook_manager_factory: Callable[[Request], BaseWorkbookManager],
+    api_serializer_factory: Callable[[], BaseCanadaApiSerializer],
 ) -> Callable[[Request, Handler], Awaitable[StreamResponse]]:
     @middleware
     async def attach_services_mw(request: Request, handler: Handler) -> StreamResponse:

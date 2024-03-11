@@ -40,8 +40,9 @@ class CollectionContentView(BaseView):
         coll_content = await self.app_services.wbman.list_collection(collection_id)
 
         return {
-            "collections": [self.app_services.api_serializer.serialize_collection(coll) for coll in
-                            coll_content.collections],
+            "collections": [
+                self.app_services.api_serializer.serialize_collection(coll) for coll in coll_content.collections
+            ],
             "collectionsNextPageToken": None,
             "workbooks": [self.app_services.api_serializer.serialize_workbook(wb) for wb in coll_content.workbooks],
             "workbooksNextPageToken": None,
@@ -94,10 +95,12 @@ class CollectionBreadcrumbsView(BaseView):
 
         while collection_id is not None:
             collection = await self.app_services.wbman.get_collection(collection_id)
-            resp_data.append({
-                "collectionId": collection.collection_id,
-                "title": collection.title,
-            })
+            resp_data.append(
+                {
+                    "collectionId": collection.collection_id,
+                    "title": collection.title,
+                }
+            )
             collection_id = collection.parent_id
 
         # Incompatible return value type (got "list[dict[str, str | None]]",
