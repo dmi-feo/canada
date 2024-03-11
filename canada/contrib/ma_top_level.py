@@ -29,18 +29,12 @@ class TopLevelSchema(Schema):
             unknown=unknown,
         )
         if not self.declared_fields:
-            raise TypeError(
-                "TopLevelSchema should have exactly one field with name: "
-                f"{self._toplevel_field}"
-            )
+            raise TypeError("TopLevelSchema should have exactly one field with name: " f"{self._toplevel_field}")
         if len(self.declared_fields) > 1:
             raise TypeError("TopLevelSchema can contain only one field")
         field = list(self.declared_fields.keys())[0]
         if field != self._toplevel_field:
-            raise TypeError(
-                "The only field in TopLevelSchema should have name: "
-                f"{self._toplevel_field}"
-            )
+            raise TypeError("The only field in TopLevelSchema should have name: " f"{self._toplevel_field}")
 
     def _do_load(
         self,
@@ -55,9 +49,7 @@ class TopLevelSchema(Schema):
         postprocess: bool = True,
     ):
         data = {self._toplevel_field: data}
-        processed_data = super()._do_load(
-            data, many=many, partial=partial, unknown=unknown, postprocess=postprocess
-        )
+        processed_data = super()._do_load(data, many=many, partial=partial, unknown=unknown, postprocess=postprocess)
         return processed_data[self._toplevel_field]
 
     def load(

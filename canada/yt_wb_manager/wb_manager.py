@@ -34,10 +34,8 @@ class YTWorkbookManager(BaseWorkbookManager):
             self.serializer.deserialize_workbook(SerializableEntity(title=node.name, attributes=node.attributes))
             for node in dir_nodes
             if (
-                    node.attributes.get(
-                        yt_const.YTAttributes.DL_TYPE.value,
-                        CanadaEntityType.workbook.value
-                    ) == CanadaEntityType.workbook.value
+                node.attributes.get(yt_const.YTAttributes.DL_TYPE.value, CanadaEntityType.workbook.value)
+                == CanadaEntityType.workbook.value
             )
         ]
 
@@ -45,13 +43,8 @@ class YTWorkbookManager(BaseWorkbookManager):
             self.serializer.deserialize_collection(SerializableEntity(title=node.name, attributes=node.attributes))
             for node in dir_nodes
             if (
-                (
-                    node.attributes.get(yt_const.YTAttributes.DL_TYPE.value) ==
-                    CanadaEntityType.collection.value
-                ) and (
-                    node.attributes[yt_const.YTAttributes.ID.value] !=
-                    self.root_collection_node_id
-                )
+                (node.attributes.get(yt_const.YTAttributes.DL_TYPE.value) == CanadaEntityType.collection.value)
+                and (node.attributes[yt_const.YTAttributes.ID.value] != self.root_collection_node_id)
             )
         ]
 
@@ -64,7 +57,10 @@ class YTWorkbookManager(BaseWorkbookManager):
         async with self.yt_client:
             coll_dir_attrs = await self.yt_client.get_node_attributes(coll_id)
         return self.serializer.deserialize_collection(
-            SerializableEntity(title=coll_dir_attrs[yt_const.YTAttributes.KEY.value], attributes=coll_dir_attrs)
+            SerializableEntity(
+                title=coll_dir_attrs[yt_const.YTAttributes.KEY.value],
+                attributes=coll_dir_attrs,
+            )
         )
 
     async def create_collection(self, collection: Collection) -> str:
@@ -78,8 +74,7 @@ class YTWorkbookManager(BaseWorkbookManager):
         async with self.yt_client:
             async with self.yt_client.transaction() as tx_id:
                 node_id = await self.yt_client.create_node(
-                    new_node_path, node_type=yt_const.YTNodeType.map_node,
-                    tx_id=tx_id
+                    new_node_path, node_type=yt_const.YTNodeType.map_node, tx_id=tx_id
                 )
                 for attr_key, attr_value in serialized.attributes.items():
                     await self.yt_client.set_attribute(node_id, attr_key, attr_value, tx_id=tx_id)
@@ -94,7 +89,10 @@ class YTWorkbookManager(BaseWorkbookManager):
         async with self.yt_client:
             wb_dir_attrs = await self.yt_client.get_node_attributes(wb_id)
         return self.serializer.deserialize_workbook(
-            SerializableEntity(title=wb_dir_attrs[yt_const.YTAttributes.KEY.value], attributes=wb_dir_attrs)
+            SerializableEntity(
+                title=wb_dir_attrs[yt_const.YTAttributes.KEY.value],
+                attributes=wb_dir_attrs,
+            )
         )
 
     async def create_workbook(self, workbook: Workbook) -> str:
@@ -108,8 +106,7 @@ class YTWorkbookManager(BaseWorkbookManager):
         async with self.yt_client:
             async with self.yt_client.transaction() as tx_id:
                 node_id = await self.yt_client.create_node(
-                    new_node_path, node_type=yt_const.YTNodeType.map_node,
-                    tx_id=tx_id
+                    new_node_path, node_type=yt_const.YTNodeType.map_node, tx_id=tx_id
                 )
                 for attr_key, attr_value in serialized.attributes.items():
                     await self.yt_client.set_attribute(node_id, attr_key, attr_value, tx_id=tx_id)
@@ -124,12 +121,12 @@ class YTWorkbookManager(BaseWorkbookManager):
             self.serializer.deserialize_entry(SerializableEntity(title=node.name, attributes=node.attributes))
             for node in dir_nodes
             if (
-                node.attributes.get(yt_const.YTAttributes.DL_TYPE.value) ==
-                CanadaEntityType.entry.value and (
+                node.attributes.get(yt_const.YTAttributes.DL_TYPE.value) == CanadaEntityType.entry.value
+                and (
                     # there must have been `search` method in cypress with filtration
                     # but no trace of it in doc...
-                    node.attributes.get(yt_const.YTAttributes.DL_ENTRY_SCOPE.value) == scope or
-                    scope is None
+                    node.attributes.get(yt_const.YTAttributes.DL_ENTRY_SCOPE.value) == scope
+                    or scope is None
                 )
             )
         ]
@@ -169,8 +166,11 @@ class YTWorkbookManager(BaseWorkbookManager):
         return node_id
 
     async def update_entry(
-            self, entry_id: str, entry_data: JSONDict | None, unversioned_data: JSONDict | None,
-            lock_token: str | None = None,
+        self,
+        entry_id: str,
+        entry_data: JSONDict | None,
+        unversioned_data: JSONDict | None,
+        lock_token: str | None = None,
     ) -> None:
         running_tx_id = lock_token
         async with self.yt_client:
@@ -188,18 +188,12 @@ class YTWorkbookManager(BaseWorkbookManager):
 
                 curr_entry.data = entry_data if entry_data is not None else curr_entry.data
                 curr_entry.unversioned_data = (
-                    unversioned_data
-                    if unversioned_data is not None
-                    else curr_entry.unversioned_data
+                    unversioned_data if unversioned_data is not None else curr_entry.unversioned_data
                 )
 
                 serialized = self.serializer.serialize_entry(curr_entry)
                 assert serialized.data is not None
-                await self.yt_client.write_document(
-                    node_id=entry_id,
-                    data=serialized.data,
-                    tx_id=tx_id
-                )
+                await self.yt_client.write_document(node_id=entry_id, data=serialized.data, tx_id=tx_id)
 
     async def delete_entry(self, entry_id: str) -> None:
         async with self.yt_client:

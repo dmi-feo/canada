@@ -52,9 +52,11 @@ class BaseWorkbookManager(abc.ABC):
 
     @abc.abstractmethod
     async def update_entry(
-            self, entry_id: str,
-            entry_data: JSONDict | None, unversioned_data: JSONDict | None,
-            lock_token: str | None = None,
+        self,
+        entry_id: str,
+        entry_data: JSONDict | None,
+        unversioned_data: JSONDict | None,
+        lock_token: str | None = None,
     ) -> None:
         # TODO: introduce EntryUpdate object
         pass

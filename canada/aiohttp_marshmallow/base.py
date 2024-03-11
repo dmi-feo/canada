@@ -17,8 +17,7 @@ ViewExpectingData: TypeAlias = Callable[[ViewType, JSONDict], Awaitable[JSON]]
 
 
 def with_schema(
-        req_schema: Type[ma.Schema] | None = None,
-        resp_schema: Type[ma.Schema] = ma.Schema
+    req_schema: Type[ma.Schema] | None = None, resp_schema: Type[ma.Schema] = ma.Schema
 ) -> Callable[[ViewExpectingData[ViewType]], View[ViewType]]:
     def wrapper(coro: ViewExpectingData[ViewType]) -> View[ViewType]:
         @functools.wraps(coro)

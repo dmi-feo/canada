@@ -120,8 +120,10 @@ class SimpleCanadaStorageSerializer(BaseCanadaStorageSerializer):
 
     def deserialize_entry(self, raw_data: SerializableEntity) -> Entry:
         return Entry(
-            data=raw_data.data[self.YT_DOCUMENT_DATA_KEY] if raw_data.data is not None else {},
-            unversioned_data=raw_data.data[self.YT_DOCUMENT_UNVERSIONED_DATA_KEY] if raw_data.data is not None else {},
+            data=(raw_data.data[self.YT_DOCUMENT_DATA_KEY] if raw_data.data is not None else {}),
+            unversioned_data=(
+                raw_data.data[self.YT_DOCUMENT_UNVERSIONED_DATA_KEY] if raw_data.data is not None else {}
+            ),
             entry_id=raw_data.attributes[yt_const.YTAttributes.ID.value],
             workbook_id=raw_data.attributes[yt_const.YTAttributes.PARENT_ID.value],
             title=raw_data.title,

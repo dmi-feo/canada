@@ -17,7 +17,10 @@ router = web.RouteTableDef()
 
 @router.view("/v2/workbooks")
 class WorkbooksView(BaseView):
-    @with_schema(req_schema=schema.CreateWorkbookRequest, resp_schema=schema.CreateWorkbookResponse)
+    @with_schema(
+        req_schema=schema.CreateWorkbookRequest,
+        resp_schema=schema.CreateWorkbookResponse,
+    )
     async def post(self, data: JSONDict) -> JSON:
         """
         Create workbook

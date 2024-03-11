@@ -15,8 +15,8 @@ if TYPE_CHECKING:
 router = web.RouteTableDef()
 
 
-@router.view('/v1/entries/{entry_id}')
-@router.view('/private/entries/{entry_id}')
+@router.view("/v1/entries/{entry_id}")
+@router.view("/private/entries/{entry_id}")
 class EntryItemView(BaseView):
     @with_schema(resp_schema=schema.GetEntryResponse)
     async def get(self, data: JSONDict) -> JSON:
