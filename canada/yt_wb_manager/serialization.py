@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import ClassVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import attr
 
 from canada.constants import CanadaEntityType
+from canada.models import Collection, Entry, ModificationInfo, Workbook
 from canada.yt_wb_manager import constants as yt_const
-from canada.models import Workbook, Collection, Entry, ModificationInfo
 
 if TYPE_CHECKING:
     from canada.types import JSONDict

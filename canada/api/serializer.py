@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import attr
 
-from canada.models import Workbook, Collection, Entry
+from canada.models import Collection, Entry, Workbook
 
 if TYPE_CHECKING:
     from canada.types import JSONDict
