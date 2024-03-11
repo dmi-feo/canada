@@ -1,6 +1,6 @@
 from __future__ import annotations
 import functools
-from typing import Type, Awaitable, Callable, TYPE_CHECKING, TypeVar, TypeAlias
+from typing import Type, Awaitable, Callable, TypeVar, TypeAlias
 
 import marshmallow as ma
 from aiohttp import web

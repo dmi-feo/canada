@@ -10,7 +10,7 @@ from canada.yt_wb_manager import constants as yt_const
 from canada.models import Workbook, Collection, Entry, ModificationInfo
 
 if TYPE_CHECKING:
-    from canada.types import JSON, JSONDict
+    from canada.types import JSONDict
 
 
 @attr.s

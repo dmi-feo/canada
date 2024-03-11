@@ -6,7 +6,6 @@ from typing import Callable
 
 from aiohttp import web
 
-from canada.api import entry, workbook, collection
 from canada.app_stuff import attach_services
 from canada.settings import CanadaSettings
 from canada.api.serializer import SimpleCanadaApiSerializer
