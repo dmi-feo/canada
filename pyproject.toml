@@ -7,8 +7,23 @@ description = "Make US redundant again"
 requires-python = ">=3.7"
 license = {text = "Apache 2.0"}
 dynamic = ["version"]
+dependencies = [
+    "aiohttp < 4",
+    "aiosignal < 1.4",
+    "attrs < 24",
+    "marshmallow < 4",
+]
 
-# TODO: requirements (common + dev)
+[project.optional-dependencies]
+tests = [
+    "pytest < 9",
+    "pytest_aiohttp < 2",
+    "mypy == 1.8.0",
+]
+release = [
+    "bump-my-version == 0.18.3",
+    "generate-changelog == 0.10.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
