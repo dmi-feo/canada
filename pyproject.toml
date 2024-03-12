@@ -18,6 +18,7 @@ dependencies = [
 tests = [
     "pytest < 9",
     "pytest_aiohttp < 2",
+    "mypy == 1.8.0",
 ]
 release = [
     "bump-my-version == 0.18.3",
