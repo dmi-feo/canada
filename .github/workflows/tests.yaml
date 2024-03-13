@@ -11,9 +11,9 @@ jobs:
         python-version: "3.12"
     - run: pip install .[tests]
     - run: pip install ytsaurus-client
+    - run: docker compose -f "tests/docker-compose.yml" up -d
     - run: echo "node-id=$(yt --proxy http://localhost:58080 create --path //canada_tests --type map_node)\n" >> $GITHUB_OUTPUT
       id: create_yt_node
-    - run: docker compose -f "tests/docker-compose.yml" up -d
     - run: pytest tests
       env:
         YT_HOST: "http://localhost:58080"
