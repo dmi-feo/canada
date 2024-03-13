@@ -10,7 +10,7 @@ jobs:
       with:
         python-version: "3.12"
     - run: pip install .[tests]
-    - run: docker compose up -f "tests/docker-compose.yml"
+    - run: docker compose -f "tests/docker-compose.yml" up -d
     - run: pytest tests
       env:
         YT_HOST: "http://localhost:58080"
