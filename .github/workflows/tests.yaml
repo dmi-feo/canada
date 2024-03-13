@@ -1,0 +1,17 @@
+name: tests
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+    - run: pip install .[tests]
+    - run: docker compose up -f "tests/docker-compose.yml"
+    - run: pytest tests
+      env:
+        YT_HOST: "http://localhost:58080"
+        ROOT_COLLECTION_NODE_ID: "1-4a7a-1012f-2e2c88bf"  # FIXME
