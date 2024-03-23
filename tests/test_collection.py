@@ -21,4 +21,4 @@ async def test_create_nested_collections(wb_client):
 async def test_get_nonexistent_collection(wb_client):
     resp = await wb_client.client.get("/v1/collections/1-238c-1012f-1f9b37b")
     assert resp.status == 424
-    assert await resp.text() is None
+    assert "Error resolving path #1-238c-1012f-1f9b37b" in await resp.text()
