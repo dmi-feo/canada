@@ -16,7 +16,7 @@ from canada.settings import CanadaSettings
 from canada.yt_wb_manager import constants as yt_const
 from canada.yt_wb_manager.constants import YTAuthMode
 from canada.yt_wb_manager.serialization import SimpleCanadaStorageSerializer
-from canada.yt_wb_manager.wb_manager import YTWorkbookManager, WBAwareYtClient
+from canada.yt_wb_manager.wb_manager import WBAwareYtClient, YTWorkbookManager
 from canada.yt_wb_manager.yt_client.auth import YTCookieAuthContext, YTNoAuthContext
 
 

@@ -6,15 +6,15 @@ import aiohttp.web
 import attr
 from aiohttp.web import View, middleware
 
-from canada.constants import REQUEST_KEY_APP_SERVICES
 from canada.base_wb_manager.exc import WBManagerStorageError
+from canada.constants import REQUEST_KEY_APP_SERVICES
 
 if TYPE_CHECKING:
     from aiohttp.typedefs import Handler
     from aiohttp.web import Request, StreamResponse
 
     from canada.api.serializer import BaseCanadaApiSerializer
-    from canada.base_wb_manager import BaseWorkbookManager
+    from canada.base_wb_manager.base_wb_manager import BaseWorkbookManager
 
 
 class BaseView(View):

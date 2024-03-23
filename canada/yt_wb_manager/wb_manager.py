@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import aiohttp
 import attr
@@ -12,8 +12,8 @@ from canada.models import Collection, CollectionContent, Entry, Workbook
 from canada.yt_wb_manager import constants as yt_const
 from canada.yt_wb_manager.exc import RootCollectionCannotBeRequested
 from canada.yt_wb_manager.serialization import SerializableEntity
-from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
 from canada.yt_wb_manager.yt_client.exc import YtServerError
+from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
 
 if TYPE_CHECKING:
     from canada.types import JSONDict
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 class WBAwareYtClient(SimpleYtClient):
-    async def make_request(self, *args, **kwargs) -> aiohttp.ClientResponse:
+    async def make_request(self, *args: Any, **kwargs: Any) -> aiohttp.ClientResponse:
         try:
             return await super().make_request(*args, **kwargs)
         except YtServerError as err:
