@@ -1,15 +1,18 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
+import aiohttp
 import attr
 
-from canada.base_wb_manager import BaseWorkbookManager
+from canada.base_wb_manager.base_wb_manager import BaseWorkbookManager
+from canada.base_wb_manager.exc import WBManagerStorageError
 from canada.constants import CanadaEntityType
 from canada.models import Collection, CollectionContent, Entry, Workbook
 from canada.yt_wb_manager import constants as yt_const
 from canada.yt_wb_manager.exc import RootCollectionCannotBeRequested
 from canada.yt_wb_manager.serialization import SerializableEntity
+from canada.yt_wb_manager.yt_client.exc import YtServerError
 from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
 
 if TYPE_CHECKING:
@@ -17,9 +20,17 @@ if TYPE_CHECKING:
     from canada.yt_wb_manager.serialization import BaseCanadaStorageSerializer
 
 
+class WBAwareYtClient(SimpleYtClient):
+    async def make_request(self, *args: Any, **kwargs: Any) -> aiohttp.ClientResponse:
+        try:
+            return await super().make_request(*args, **kwargs)
+        except YtServerError as err:
+            raise WBManagerStorageError(message=err.message) from err
+
+
 @attr.s
 class YTWorkbookManager(BaseWorkbookManager):
-    yt_client: SimpleYtClient = attr.ib()
+    yt_client: WBAwareYtClient = attr.ib()
     root_collection_node_id: str = attr.ib()
     serializer: BaseCanadaStorageSerializer = attr.ib()
 

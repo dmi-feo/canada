@@ -11,22 +11,21 @@ import canada.api.entry.views
 import canada.api.lock.views
 import canada.api.workbook.views
 from canada.api.serializer import SimpleCanadaApiSerializer
-from canada.app_stuff import attach_services
+from canada.app_stuff import attach_services, error_handling
 from canada.settings import CanadaSettings
 from canada.yt_wb_manager import constants as yt_const
 from canada.yt_wb_manager.constants import YTAuthMode
 from canada.yt_wb_manager.serialization import SimpleCanadaStorageSerializer
-from canada.yt_wb_manager.wb_manager import YTWorkbookManager
+from canada.yt_wb_manager.wb_manager import WBAwareYtClient, YTWorkbookManager
 from canada.yt_wb_manager.yt_client.auth import YTCookieAuthContext, YTNoAuthContext
-from canada.yt_wb_manager.yt_client.yt_client import SimpleYtClient
 
 
 def get_yt_cli_noauth_factory(
     settings: CanadaSettings,
-) -> Callable[[web.Request], SimpleYtClient]:
-    def yt_cli_factory(request: web.Request) -> SimpleYtClient:
+) -> Callable[[web.Request], WBAwareYtClient]:
+    def yt_cli_factory(request: web.Request) -> WBAwareYtClient:
         auth_context = YTNoAuthContext()
-        return SimpleYtClient(
+        return WBAwareYtClient(
             yt_host=settings.YT_HOST,
             auth_context=auth_context,
             ca_file=settings.CA_FILE,
@@ -37,13 +36,13 @@ def get_yt_cli_noauth_factory(
 
 def get_yt_cli_env_cookie_auth_factory(
     settings: CanadaSettings,
-) -> Callable[[web.Request], SimpleYtClient]:
-    def yt_cli_factory(request: web.Request) -> SimpleYtClient:
+) -> Callable[[web.Request], WBAwareYtClient]:
+    def yt_cli_factory(request: web.Request) -> WBAwareYtClient:
         auth_context = YTCookieAuthContext(
             cypress_cookie=os.environ["YT_COOKIE"],
             csrf_token=os.environ["YT_CSRF_TOKEN"],
         )
-        return SimpleYtClient(
+        return WBAwareYtClient(
             yt_host=settings.YT_HOST,
             auth_context=auth_context,
             ca_file=settings.CA_FILE,
@@ -54,13 +53,13 @@ def get_yt_cli_env_cookie_auth_factory(
 
 def get_yt_cli_request_cookie_auth_factory(
     settings: CanadaSettings,
-) -> Callable[[web.Request], SimpleYtClient]:
-    def yt_cli_factory(request: web.Request) -> SimpleYtClient:
+) -> Callable[[web.Request], WBAwareYtClient]:
+    def yt_cli_factory(request: web.Request) -> WBAwareYtClient:
         auth_context = YTCookieAuthContext(
             cypress_cookie=request.cookies[yt_const.YT_COOKIE_TOKEN_NAME],
             csrf_token=request.headers[yt_const.YT_HEADER_CSRF_NAME],
         )
-        return SimpleYtClient(
+        return WBAwareYtClient(
             yt_host=settings.YT_HOST,
             auth_context=auth_context,
             ca_file=settings.CA_FILE,
@@ -70,7 +69,7 @@ def get_yt_cli_request_cookie_auth_factory(
 
 
 def get_workbook_manager_factory(
-    yt_cli_factory: Callable[[web.Request], SimpleYtClient],
+    yt_cli_factory: Callable[[web.Request], WBAwareYtClient],
     root_collection_node_id: str,
 ) -> Callable[[web.Request], YTWorkbookManager]:
     def workbook_manager_factory(request: web.Request) -> YTWorkbookManager:
@@ -86,7 +85,7 @@ def get_workbook_manager_factory(
 def create_app(settings: CanadaSettings) -> web.Application:
     logging.basicConfig(level=logging.DEBUG)
 
-    yt_cli_factory: Callable[[web.Request], SimpleYtClient]
+    yt_cli_factory: Callable[[web.Request], WBAwareYtClient]
     match settings.YT_AUTH_MODE:
         case YTAuthMode.disabled:
             yt_cli_factory = get_yt_cli_noauth_factory(settings)
@@ -99,6 +98,7 @@ def create_app(settings: CanadaSettings) -> web.Application:
 
     app_instance = web.Application(
         middlewares=[
+            error_handling,
             attach_services(
                 workbook_manager_factory=get_workbook_manager_factory(
                     yt_cli_factory=yt_cli_factory,

@@ -16,3 +16,9 @@ async def test_create_nested_collections(wb_client):
         async with wb_client.collection_ctx(title="coll2", parent_id=coll1_id) as coll2_id:
             collection_2 = await wb_client.get_collection(coll2_id)
             assert collection_2["parentId"] == coll1_id
+
+
+async def test_get_nonexistent_collection(wb_client):
+    resp = await wb_client.client.get("/v1/collections/1-238c-1012f-1f9b37b")
+    assert resp.status == 424
+    assert "Error resolving path #1-238c-1012f-1f9b37b" in await resp.text()

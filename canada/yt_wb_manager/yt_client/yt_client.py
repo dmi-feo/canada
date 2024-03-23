@@ -10,6 +10,7 @@ import attr
 
 from canada.yt_wb_manager.constants import YTLockMode, YTNodeType
 from canada.yt_wb_manager.yt_client.auth import BaseYTAuthContext
+from canada.yt_wb_manager.yt_client.exc import YtServerError
 
 if TYPE_CHECKING:
     from canada.types import JSON, JSONDict
@@ -77,8 +78,8 @@ class SimpleYtClient:
             json=json_data,
             cookies=cookies,
         )
-        print(resp.status, resp.headers)
-        resp.raise_for_status()
+        if not resp.ok:
+            raise YtServerError(message=await resp.text())
         return resp
 
     @asynccontextmanager
