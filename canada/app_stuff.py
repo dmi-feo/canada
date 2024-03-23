@@ -49,6 +49,7 @@ def attach_services(
 
 @middleware
 async def error_handling(request: Request, handler: Handler) -> StreamResponse:
+    # TODO: make compatible with United Storage
     try:
         return await handler(request)
     except WBManagerStorageError as err:
