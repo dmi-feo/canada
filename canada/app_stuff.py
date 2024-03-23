@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Awaitable, Callable
 
+import aiohttp.web
 import attr
 from aiohttp.web import View, middleware
 
 from canada.constants import REQUEST_KEY_APP_SERVICES
+from canada.base_wb_manager.exc import WBManagerStorageError
 
 if TYPE_CHECKING:
     from aiohttp.typedefs import Handler
@@ -43,3 +45,11 @@ def attach_services(
         return resp
 
     return attach_services_mw
+
+
+@middleware
+async def error_handling(request: Request, handler: Handler) -> StreamResponse:
+    try:
+        return await handler(request)
+    except WBManagerStorageError as err:
+        raise aiohttp.web.HTTPFailedDependency(text=err.message)
