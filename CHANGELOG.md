@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.8.0 (2024-03-23)
+
+[Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.7.0...0.8.0)
+
+### Changes
+
+- Simple error handling (#33). [63500af](https://github.com/dmi-feo/canada/commit/63500afc54929516ba5ae265da332e483d4ece73)
+    
+- Workflow for tests (#32). [e4becf3](https://github.com/dmi-feo/canada/commit/e4becf342de4a4259d8fb5f8dfb5168f0502d728)
+    
+- Requirements from pyproject.toml (#31). [45183f2](https://github.com/dmi-feo/canada/commit/45183f295416a4b3ec95158ab5f887ebf4fa59a1)
+    
+- Paint it black (and check in pr) (#28). [1a7260d](https://github.com/dmi-feo/canada/commit/1a7260d951b58d60085036c4a5711b58f130efe0)
+    
+- Add isort check on pr (#27). [c4ec888](https://github.com/dmi-feo/canada/commit/c4ec8885ff722b1d6e500b1ba6a4c5ea970734ba)
+    
+- Add ruff check on pr (#26). [d742477](https://github.com/dmi-feo/canada/commit/d742477acd1c8487e29c824789fad370fabf105a)
+    
+- Grand refactoring for the sake of strict mypy (#25). [22b83aa](https://github.com/dmi-feo/canada/commit/22b83aa92b7df41301e350d1b0c2d72a87280f7c)
+    
+
 ## 0.7.0 (2024-03-05)
 
 [Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.6.0...0.7.0)
