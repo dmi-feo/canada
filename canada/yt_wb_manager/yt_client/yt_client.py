@@ -215,6 +215,7 @@ class SimpleYtClient:
             "auth/whoami",
         )
         parsed_response = await response.json()
-        if isinstance(parsed_response.get("csrf_token"), str):
+        csrf_token = parsed_response.get("csrf_token")
+        if isinstance(csrf_token, str):
             raise YtServerError(f"Invalid whoami response {parsed_response}")
-        return parsed_response["csrf_token"]
+        return csrf_token
