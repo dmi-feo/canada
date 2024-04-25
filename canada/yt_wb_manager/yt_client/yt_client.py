@@ -26,12 +26,11 @@ class YtNode:
 class SimpleYtClient:
     yt_host: str = attr.ib()
     auth_context: BaseYTAuthContext = attr.ib()
-    ca_file: str | None = attr.ib(default=None)
+    ssl_context: ssl.SSLContext = attr.ib()
     _session: aiohttp.ClientSession | None = attr.ib(default=None)
 
     async def __aenter__(self) -> Self:
-        ssl_context = ssl.create_default_context(cafile=self.ca_file)
-        self._session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
+        self._session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=self.ssl_context))
         return self
 
     async def __aexit__(
@@ -64,7 +63,7 @@ class SimpleYtClient:
         params = params or {}
         cookies = cookies or {}
 
-        self.auth_context.mutate_auth_data(cookies=cookies, headers=headers)  # TODO FIXME: it's ugly
+        auth_data = self.auth_context.get_auth_data(cookies=cookies, headers=headers)
 
         if "transaction_id" in params and params["transaction_id"] is None:
             del params["transaction_id"]
@@ -74,9 +73,9 @@ class SimpleYtClient:
             method=method,
             url=f"{self.yt_host}/api/v3/{url}",
             params=params,
-            headers=headers,
+            headers=auth_data.headers,
             json=json_data,
-            cookies=cookies,
+            cookies=auth_data.cookies,
         )
         if not resp.ok:
             raise YtServerError(message=await resp.text())
@@ -209,3 +208,11 @@ class SimpleYtClient:
             json_data={"path": f"#{node_id}"},
             params={"transaction_id": tx_id},
         )
+
+    async def get_csrf_token(self) -> str:
+        response = await self.make_request(
+            "POST",
+            "auth/whoami",
+        )
+        parsed_response = await response.json()
+        return parsed_response["csrf_token"]
