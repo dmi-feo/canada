@@ -26,7 +26,7 @@ class YTNoAuthContext(BaseYTAuthContext):
 @attr.s(slots=True)
 class YTCookieAuthContext(BaseYTAuthContext):
     cypress_cookie: str = attr.ib(repr=False)
-    csrf_token: Optional[str] = attr.ib(repr=False)
+    csrf_token: Optional[str] = attr.ib(repr=False, default=None)
 
     def get_auth_data(self, cookies: dict[str, str], headers: dict[str, str]) -> YTAuthData:
         cookies = cookies.copy()
