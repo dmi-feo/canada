@@ -1,17 +1,29 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Awaitable, Callable
+from typing import (
+    TYPE_CHECKING,
+    Awaitable,
+    Callable,
+)
 
 import aiohttp.web
+from aiohttp.web import (
+    View,
+    middleware,
+)
 import attr
-from aiohttp.web import View, middleware
 
 from canada.base_wb_manager.exc import WBManagerStorageError
 from canada.constants import REQUEST_KEY_APP_SERVICES
+from canada.factories import WorkbookManagerFactory
+
 
 if TYPE_CHECKING:
     from aiohttp.typedefs import Handler
-    from aiohttp.web import Request, StreamResponse
+    from aiohttp.web import (
+        Request,
+        StreamResponse,
+    )
 
     from canada.api.serializer import BaseCanadaApiSerializer
     from canada.base_wb_manager.base_wb_manager import BaseWorkbookManager
@@ -30,13 +42,14 @@ class AppServices:
 
 
 def attach_services(
-    workbook_manager_factory: Callable[[Request], BaseWorkbookManager],
+    workbook_manager_factory: WorkbookManagerFactory,
     api_serializer_factory: Callable[[], BaseCanadaApiSerializer],
 ) -> Callable[[Request, Handler], Awaitable[StreamResponse]]:
     @middleware
     async def attach_services_mw(request: Request, handler: Handler) -> StreamResponse:
+        workbook_manager = await workbook_manager_factory.make_workbook_manager(request)
         app_services = AppServices(
-            wbman=workbook_manager_factory(request),
+            wbman=workbook_manager,
             api_serializer=api_serializer_factory(),
         )
 

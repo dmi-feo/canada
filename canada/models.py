@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import attr
 
+
 if TYPE_CHECKING:
     from canada.types import JSON
 

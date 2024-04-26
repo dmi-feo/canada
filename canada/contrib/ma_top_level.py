@@ -1,6 +1,9 @@
 import typing
 
-from marshmallow import Schema, types
+from marshmallow import (
+    Schema,
+    types,
+)
 
 
 class TopLevelSchema(Schema):
