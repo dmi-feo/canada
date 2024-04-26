@@ -4,12 +4,16 @@ from typing import TYPE_CHECKING
 
 from aiohttp import web
 
-import canada.api.collection.schema as sch
 from canada.aiohttp_marshmallow.base import with_schema
+import canada.api.collection.schema as sch
 from canada.app_stuff import BaseView
 
+
 if TYPE_CHECKING:
-    from canada.types import JSON, JSONDict
+    from canada.types import (
+        JSON,
+        JSONDict,
+    )
 
 
 router = web.RouteTableDef()

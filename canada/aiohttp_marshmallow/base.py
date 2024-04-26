@@ -1,14 +1,24 @@
 from __future__ import annotations
 
 import functools
-from typing import Awaitable, Callable, Type, TypeAlias, TypeVar
+from typing import (
+    Awaitable,
+    Callable,
+    Type,
+    TypeAlias,
+    TypeVar,
+)
 
-import marshmallow as ma
 from aiohttp import web
 from aiohttp.web_response import Response
+import marshmallow as ma
 
 from canada.app_stuff import BaseView
-from canada.types import JSON, JSONDict
+from canada.types import (
+    JSON,
+    JSONDict,
+)
+
 
 ViewType = TypeVar("ViewType", bound=BaseView)
 

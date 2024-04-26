@@ -1,6 +1,6 @@
+from contextlib import asynccontextmanager
 import random
 import string
-from contextlib import asynccontextmanager
 
 import attr
 

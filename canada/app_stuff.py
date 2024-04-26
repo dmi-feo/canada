@@ -1,18 +1,29 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Awaitable, Callable
+from typing import (
+    TYPE_CHECKING,
+    Awaitable,
+    Callable,
+)
 
 import aiohttp.web
+from aiohttp.web import (
+    View,
+    middleware,
+)
 import attr
-from aiohttp.web import View, middleware
 
 from canada.base_wb_manager.exc import WBManagerStorageError
 from canada.constants import REQUEST_KEY_APP_SERVICES
 from canada.factories import WorkbookManagerFactory
 
+
 if TYPE_CHECKING:
     from aiohttp.typedefs import Handler
-    from aiohttp.web import Request, StreamResponse
+    from aiohttp.web import (
+        Request,
+        StreamResponse,
+    )
 
     from canada.api.serializer import BaseCanadaApiSerializer
     from canada.base_wb_manager.base_wb_manager import BaseWorkbookManager

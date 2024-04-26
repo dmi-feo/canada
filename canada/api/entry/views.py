@@ -8,8 +8,12 @@ from canada.aiohttp_marshmallow.base import with_schema
 from canada.api.entry import schema
 from canada.app_stuff import BaseView
 
+
 if TYPE_CHECKING:
-    from canada.types import JSON, JSONDict
+    from canada.types import (
+        JSON,
+        JSONDict,
+    )
 
 
 router = web.RouteTableDef()

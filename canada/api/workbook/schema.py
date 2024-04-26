@@ -1,6 +1,9 @@
 import marshmallow as ma
 
-from canada.api.base_schema import EntrySchema, WorkbookSchema
+from canada.api.base_schema import (
+    EntrySchema,
+    WorkbookSchema,
+)
 
 
 class CreateWorkbookRequest(ma.Schema):

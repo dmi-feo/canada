@@ -4,13 +4,19 @@ import abc
 import os
 import ssl
 
-import attr
 from aiohttp import web
+import attr
 
 from canada.yt_wb_manager import constants as yt_const
 from canada.yt_wb_manager.serialization import SimpleCanadaStorageSerializer
-from canada.yt_wb_manager.wb_manager import WBAwareYtClient, YTWorkbookManager
-from canada.yt_wb_manager.yt_client.auth import YTCookieAuthContext, YTNoAuthContext
+from canada.yt_wb_manager.wb_manager import (
+    WBAwareYtClient,
+    YTWorkbookManager,
+)
+from canada.yt_wb_manager.yt_client.auth import (
+    YTCookieAuthContext,
+    YTNoAuthContext,
+)
 
 
 class BaseYTCliFactory(metaclass=abc.ABCMeta):
