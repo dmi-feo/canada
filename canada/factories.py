@@ -9,8 +9,8 @@ from aiohttp import web
 
 from canada.yt_wb_manager import constants as yt_const
 from canada.yt_wb_manager.serialization import SimpleCanadaStorageSerializer
-from canada.yt_wb_manager.wb_manager import YTWorkbookManager, WBAwareYtClient
-from canada.yt_wb_manager.yt_client.auth import YTNoAuthContext, YTCookieAuthContext
+from canada.yt_wb_manager.wb_manager import WBAwareYtClient, YTWorkbookManager
+from canada.yt_wb_manager.yt_client.auth import YTCookieAuthContext, YTNoAuthContext
 
 
 class BaseYTCliFactory(metaclass=abc.ABCMeta):

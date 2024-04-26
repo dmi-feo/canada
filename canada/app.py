@@ -12,13 +12,8 @@ import canada.api.lock.views
 import canada.api.workbook.views
 from canada.api.serializer import SimpleCanadaApiSerializer
 from canada.app_stuff import attach_services, error_handling
-from canada.factories import (
-    WorkbookManagerFactory,
-    BaseYTCliFactory,
-    YtCliNoauthFactory,
-    YtCliEnvCookieAuthFactory,
-    YtCliRequestCookieAuthFactory,
-)
+from canada.factories import (BaseYTCliFactory, WorkbookManagerFactory, YtCliEnvCookieAuthFactory, YtCliNoauthFactory,
+                              YtCliRequestCookieAuthFactory)
 from canada.settings import CanadaSettings
 from canada.yt_wb_manager.constants import YTAuthMode
 
