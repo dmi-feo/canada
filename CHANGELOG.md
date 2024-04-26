@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.0 (2024-04-26)
+
+[Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.9.0...0.10.0)
+
+### Changes
+
+- Fix getting csrf token (#43). [9534c84](https://github.com/dmi-feo/canada/commit/9534c84b1d0263c376cdfa9025ed38ac09f5d997)
+    
+
 ## 0.9.0 (2024-04-26)
 
 [Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.8.0...0.9.0)
