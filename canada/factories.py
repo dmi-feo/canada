@@ -53,7 +53,8 @@ class YtCliEnvCookieAuthFactory(BaseYTCliFactory):
             ),
             ssl_context=self._ssl_context,
         )
-        csrf_token = await client_without_csrf.get_csrf_token()
+        async with client_without_csrf:
+            csrf_token = await client_without_csrf.get_csrf_token()
         return WBAwareYtClient(
             yt_host=self._yt_host,
             auth_context=YTCookieAuthContext(
@@ -77,7 +78,8 @@ class YtCliRequestCookieAuthFactory(BaseYTCliFactory):
             ),
             ssl_context=self._ssl_context,
         )
-        csrf_token = await client_without_csrf.get_csrf_token()
+        async with client_without_csrf:
+            csrf_token = await client_without_csrf.get_csrf_token()
         return WBAwareYtClient(
             yt_host=self._yt_host,
             auth_context=YTCookieAuthContext(
