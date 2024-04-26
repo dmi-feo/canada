@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.9.0 (2024-04-26)
+
+[Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.8.0...0.9.0)
+
+### Changes
+
+- Get a csrf token per user's request (#40). [4782fc6](https://github.com/dmi-feo/canada/commit/4782fc6a02c37b7f85adc7b132f5b65204d92831)
+    
+- Ping view (#41). [35950c7](https://github.com/dmi-feo/canada/commit/35950c71e8165d940f260641faf364eb13fa980f)
+    
+- Fix Dockerfile, freeze dependencies versions (#39). [bc8a08e](https://github.com/dmi-feo/canada/commit/bc8a08e40aa01309f3d86d2fcac7b44ae909bf43)
+    
+
 ## 0.8.0 (2024-03-23)
 
 [Compare the full difference.](https://github.com/dmi-feo/canada/compare/0.7.0...0.8.0)
